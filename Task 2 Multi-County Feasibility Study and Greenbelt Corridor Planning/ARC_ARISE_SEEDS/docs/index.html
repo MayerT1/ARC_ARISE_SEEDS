@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SEEDS Planning Tools</title>
+<meta name="description" content="UAH technical tools for the Southern Environmental & Economic Development Strategy (SEEDS), an ARC ARISE planning project across 12 counties in NE Alabama and SE Tennessee.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  body { overflow-y: auto; }
+  .wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 56px; display: grid; gap: 36px; }
+  .kicker { font: 500 12px var(--f-mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; margin: 0; }
+  h1 { font: 700 clamp(40px, 7vw, 68px)/.95 var(--f-display); text-transform: uppercase; letter-spacing: .01em; margin: 6px 0 14px; text-wrap: balance; }
+  .lede { font-size: 18px; max-width: 62ch; margin: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 13px var(--f-mono); color: var(--muted); margin-top: 16px; }
+  h2 { font: 600 15px var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .tasks { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .task { background: var(--panel); padding: 16px 18px; display: grid; grid-template-columns: 5.5em 1fr auto; gap: 4px 16px; align-items: start; }
+  .task .id { font: 600 26px/1 var(--f-display); color: var(--muted); }
+  .task h3 { margin: 0; font: 600 20px/1.15 var(--f-display); letter-spacing: .02em; }
+  .task p { margin: 4px 0 0; color: var(--muted); font-size: 14px; max-width: 64ch; }
+  .task .when { font: 12px var(--f-mono); color: var(--muted); grid-column: 2; }
+  .task .go { grid-row: 1 / span 3; grid-column: 3; align-self: center; }
+  .task.live { background: color-mix(in srgb, var(--forest) 9%, var(--panel)); }
+  .task.live .id { color: var(--forest); }
+  .cta { display: inline-block; text-decoration: none; padding: 9px 14px; border-radius: 6px; font-weight: 600;
+    background: var(--forest); color: var(--panel); white-space: nowrap; }
+  .soon { font: 12px var(--f-mono); color: var(--muted); border: 1px dashed var(--rule); padding: 5px 9px; border-radius: 6px; white-space: nowrap; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .cols p { margin: 0; max-width: 62ch; }
+  .ctys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; font-size: 14px; margin: 0; padding: 0; list-style: none; }
+  .ctys li { display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+  footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
+  @media (max-width: 620px) {
+    .task { grid-template-columns: 1fr; }
+    .task .when, .task .go { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">ARC ARISE · Southern Environmental &amp; Economic Development Strategy</p>
+    <h1>SEEDS Planning Tools</h1>
+    <p class="lede">Technical and analytical tools from the University of Alabama in Huntsville for the Southern Appalachian Greenbelt Corridor. The project covers twelve counties across Northeast Alabama and Southeast Tennessee.</p>
+    <div class="meta"><span>Lead: Appalachian Conservation Institute</span><span>Subrecipient: UAH</span><span>Oct 2026 – Apr 2028</span></div>
+  </header>
+
+  <section>
+    <h2>UAH statement of work</h2>
+    <div class="tasks">
+      <div class="task">
+        <span class="id">T1</span><h3>Stakeholder consultation &amp; survey design</h3>
+        <p>County and community survey instruments. Responses export as criterion weights for the corridor planner.</p>
+        <span class="when">Oct – Dec 2026</span><span class="go"><span class="soon">In design</span></span>
+      </div>
+      <div class="task live">
+        <span class="id">T2+3</span><h3>Feasibility study, greenbelt corridor plan &amp; Geo-AI decision support</h3>
+        <p>GIS land prioritization, a Geo-AI conservation suitability model and least-cost greenbelt corridors, combined in one interactive planner with scenario weights.</p>
+        <span class="when">Oct 2026 – Mar 2028</span><span class="go"><a class="cta" href="tool/">Open planner</a></span>
+      </div>
+      <div class="task">
+        <span class="id">T4</span><h3>Economic impact assessment design</h3>
+        <p>Gateway-community indicator framework covering tourism, workforce and conservation value.</p>
+        <span class="when">Oct – Dec 2026</span><span class="go"><span class="soon">In design</span></span>
+      </div>
+      <div class="task">
+        <span class="id">T5</span><h3>Economic impact projection tool</h3>
+        <p>Scenario forecasting using input-output, travel cost, contingent valuation and hedonic models.</p>
+        <span class="when">Mar 2027 – Mar 2028</span><span class="go"><span class="soon">Planned</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div>
+      <h2>How the planner works</h2>
+      <p>Each criterion is summarized on an H3 hexagon grid in Earth Engine and ranked across the region. Planners weight the criteria to build a priority surface and connect recreation hubs and gateway communities with least-cost corridors. The planner then lists unprotected high-priority cells inside each corridor for easement or acquisition review.</p>
+    </div>
+    <div>
+      <h2>Project counties · ARC status</h2>
+      <ul class="ctys">
+        <li>Madison, AL<span class="pill Competitive">Competitive</span></li>
+        <li>Marshall, AL<span class="pill Transitional">Transitional</span></li>
+        <li>Jackson, AL<span class="pill Transitional">Transitional</span></li>
+        <li>Franklin, TN<span class="pill Transitional">Transitional</span></li>
+        <li>Marion, TN<span class="pill Transitional">Transitional</span></li>
+        <li>Coffee, TN<span class="pill Transitional">Transitional</span></li>
+        <li>Grundy, TN<span class="pill Distressed">Distressed</span></li>
+        <li>Bledsoe, TN<span class="pill Distressed">Distressed</span></li>
+        <li>Sequatchie, TN<span class="pill At-Risk">At-Risk</span></li>
+        <li>Warren, TN<span class="pill At-Risk">At-Risk</span></li>
+        <li>DeKalb, TN<span class="pill At-Risk">At-Risk</span></li>
+        <li>Van Buren, TN<span class="pill At-Risk">At-Risk</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>Partners: Appalachian Conservation Institute · Land Trust of North Alabama · University of Alabama in Huntsville · University of the South, Sewanee · advisory: South Cumberland Tourism Partnership.</footer>
+</div>
+</body>
+</html>

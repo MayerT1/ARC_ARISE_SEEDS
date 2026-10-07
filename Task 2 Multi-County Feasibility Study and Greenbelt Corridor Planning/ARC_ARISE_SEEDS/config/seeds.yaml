@@ -1,0 +1,124 @@
+# SEEDS Corridor Decision Support (Tasks 2 + 3) — run configuration
+# Edit here; the pipeline and the web tool both read from the outputs this drives.
+
+project:
+  name: SEEDS Greenbelt Corridor Decision Support
+  short: SEEDS-CDS
+  version: 0.1.0
+
+# ---------------------------------------------------------------- AOI
+counties:
+  # fips: [name, state, ARC FY26 economic status]
+  "01089": [Madison, AL, Competitive]
+  "01095": [Marshall, AL, Transitional]
+  "01071": [Jackson, AL, Transitional]
+  "47051": [Franklin, TN, Transitional]
+  "47061": [Grundy, TN, Distressed]
+  "47115": [Marion, TN, Transitional]
+  "47153": [Sequatchie, TN, At-Risk]
+  "47007": [Bledsoe, TN, Distressed]
+  "47177": [Warren, TN, At-Risk]
+  "47031": [Coffee, TN, Transitional]
+  "47041": [DeKalb, TN, At-Risk]
+  "47175": [Van Buren, TN, At-Risk]
+
+# ARC status -> need score used by the arc_need criterion
+arc_need_score:
+  Distressed: 1.0
+  At-Risk: 0.75
+  Transitional: 0.4
+  Competitive: 0.1
+  Attainment: 0.0
+
+# ---------------------------------------------------------------- grid
+grid:
+  h3_resolution: 7        # 7 ≈ 5.2 km² cells (~3k cells); 8 ≈ 0.74 km² (~21k cells)
+  county_source: gee      # gee | census | <path to geojson/gpkg>
+
+# ---------------------------------------------------------------- Earth Engine
+gee:
+  project: null           # GCP project for ee.Initialize(project=...)
+  scale: 30               # reduceRegions scale (m)
+  distance_scale: 90      # scale for distance transforms (m)
+  distance_neighborhood: 512
+  tile_scale: 4
+  batch_size: 400         # hexes per reduceRegions/getInfo batch
+  assets:
+    counties: TIGER/2018/Counties
+    nlcd: USGS/NLCD_RELEASES/2021_REL/NLCD
+    dem: USGS/3DEP/10m
+    gedi: LARSE/GEDI/GEDI02_A_002_MONTHLY
+    hansen: UMD/hansen/global_forest_change_2023_v1_11
+    padus_fee: USGS/GAP/PAD-US/v20/fee
+    padus_easement: USGS/GAP/PAD-US/v20/easement
+    wdpa_fallback: WCMC/WDPA/current/polygons
+    roads: TIGER/2016/Roads
+    rivers: WWF/HydroSHEDS/v1/FreeFlowingRivers
+    jrc_water: JRC/GSW1_4/GlobalSurfaceWater
+    s2: COPERNICUS/S2_SR_HARMONIZED
+  s2_window:
+    summer: ["2023-06-01", "2023-09-15"]
+    winter: ["2023-12-01", "2024-03-01"]
+  max_cloud_pct: 40
+
+# ---------------------------------------------------------------- Geo-AI suitability (RF)
+ai:
+  enabled: true
+  n_trees: 300
+  points_per_class: 2500
+  sample_scale: 90
+  train_fraction: 0.7
+  seed: 42
+  # predictors deliberately exclude any distance-to-protected layer (leakage)
+  predictors: [forest, developed, wetwater, elevation, slope, relief,
+               ndvi_summer, ndvi_winter, ndmi_summer, dist_road, dist_water]
+
+# ---------------------------------------------------------------- criteria
+# dir: +1 raw high = good, -1 raw high = bad (handled at normalisation so every
+#      normalised criterion reads "higher = more of the named thing").
+# Sign of preference lives in the scenario weights (negative weight = avoid).
+criteria:
+  forest_cover:        {label: Forest cover,             unit: "%",  group: Ecology,     src: NLCD 41/42/43}
+  canopy_height:       {label: Canopy height (GEDI RH98), unit: m,   group: Ecology,     src: GEDI L2A monthly}
+  ai_suitability:      {label: Geo-AI conservation suitability, unit: p, group: Geo-AI, src: RF on S2+NLCD+3DEP, trained on PAD-US GAP 1-2}
+  protected_proximity: {label: Proximity to protected land, unit: km, group: Connectivity, src: PAD-US fee+easement}
+  riparian_proximity:  {label: Proximity to rivers/wetlands, unit: km, group: Ecology,  src: HydroSHEDS + JRC + NLCD 11/90/95}
+  terrain_relief:      {label: Terrain relief,            unit: m,   group: Recreation,  src: 3DEP 10m (300 m local SD)}
+  development:         {label: Development intensity,    unit: "%",  group: Pressure,    src: NLCD 21-24}
+  forest_loss:         {label: Forest loss 2001-2023,    unit: "%",  group: Pressure,    src: Hansen GFC}
+  road_proximity:      {label: Road access,              unit: km,   group: Recreation,  src: TIGER roads}
+  gateway_proximity:   {label: Gateway community access, unit: km,   group: Tourism,     src: config/hubs.csv}
+  hub_proximity:       {label: Recreation hub access,    unit: km,   group: Tourism,     src: config/hubs.csv}
+  arc_need:            {label: ARC economic need,        unit: idx,  group: Equity,      src: ARC FY26 county status}
+
+# ---------------------------------------------------------------- scenarios
+# Weights are signed, any scale; tool normalises by sum(|w|).
+scenarios:
+  balanced:
+    label: Balanced (default)
+    weights: {forest_cover: 20, ai_suitability: 20, protected_proximity: 15, riparian_proximity: 10,
+              terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
+  conservation:
+    label: Conservation first
+    weights: {forest_cover: 25, canopy_height: 15, ai_suitability: 25, protected_proximity: 20,
+              riparian_proximity: 15, development: -20, road_proximity: -10, forest_loss: -5}
+  recreation:
+    label: Recreation & tourism
+    weights: {terrain_relief: 20, gateway_proximity: 25, road_proximity: 15, hub_proximity: 20,
+              forest_cover: 10, riparian_proximity: 10, development: -10}
+  equity:
+    label: Equity & workforce (ARC need)
+    weights: {arc_need: 30, gateway_proximity: 20, forest_cover: 15, hub_proximity: 15,
+              ai_suitability: 10, development: -10}
+  stakeholder:
+    label: Stakeholder survey (Task 1 — placeholder)
+    weights: {forest_cover: 20, ai_suitability: 20, protected_proximity: 15, riparian_proximity: 10,
+              terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
+
+# ---------------------------------------------------------------- corridor model
+corridor:
+  cost_exponent: 2          # cost = (1 - priority)^k + eps
+  eps: 0.02
+  protected_discount: 0.5   # cost multiplier reduction for cells >50% protected
+  development_barrier: 0.6  # normalised development above this = barrier (x10 cost)
+  zone_rings: 1             # corridor zone = path + k-ring

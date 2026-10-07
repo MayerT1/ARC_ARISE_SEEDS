@@ -1,0 +1,9 @@
+earthengine-api>=1.0
+geopandas>=0.14
+shapely>=2.0
+h3>=4.0
+networkx>=3.0
+numpy
+pandas
+pyyaml
+pytest
