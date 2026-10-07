@@ -15,7 +15,7 @@ Southern Environmental & Economic Development Strategy (SEEDS). 12 counties in N
 ```
 counties ─► H3 grid (r7 ≈ 5 km², ~3.2k cells)
         ─► Earth Engine criterion stack ─► hex zonal means
-             NLCD · 3DEP · GEDI RH98 · Hansen GFC · S2 NDVI/NDMI · TIGER roads · HydroSHEDS · PAD-US
+             NLCD · 3DEP 10m_collection · NAIP CHM 0.6 m · Hansen GFC 2025 · S2 NDVI/NDMI · TIGER roads · HydroSHEDS · PAD-US
         ─► Geo-AI: RF suitability (GAP 1-2 vs background; no distance-to-protected predictor)
         ─► percentile-normalised criteria ─► docs/data/*.json  +  outputs/*.gpkg|csv
 web tool (static, GitHub Pages):
@@ -33,6 +33,8 @@ earthengine authenticate                       # once
 python -m seeds_cds run --project <gcp-project>          # real data -> docs/data + outputs/
 python -m seeds_cds run --res 8 --project <gcp-project>  # ~21k cells
 python -m seeds_cds run --demo --counties config/aoi_counties.geojson   # synthetic, offline
+python -m seeds_cds serve                                 # open planner at http://localhost:8000/tool/
+python -m seeds_cds tiles --project <gcp-project>        # refresh EE overlay tiles (URLs expire)
 python -m pytest -q                                       # includes JS<->Python engine parity
 ```
 
@@ -69,7 +71,7 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. The site is then
 ### Known gaps / next
 
 - PAD-US `GAP_Sts` field name and asset IDs are assumed. The pipeline falls back to WDPA if PAD-US is missing.
-- GEDI is footprint-sparse; cells with no shots get a median rank. Consider swapping in a wall-to-wall canopy height layer.
+- NAIP CHM includes buildings/power lines; it is masked to NLCD vegetation classes (41/42/43/52/90) for canopy criteria.
 - No stream-order or trail layer yet. Add OSM trails and NHDPlus when available.
 - Corridor resistance is a priority transform, not a species-specific resistance surface.
 - Hub list needs ACI/LTNAL review.

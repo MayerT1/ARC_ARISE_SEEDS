@@ -126,7 +126,7 @@
         </div>
         <div class="sec method" id="method">
           <h3>Method</h3>
-          <p>The region is tiled into H3 hexagons. Earth Engine computes zonal means for each cell from NLCD land cover, 3DEP terrain, GEDI canopy height, Hansen forest loss, Sentinel-2 seasonal indices, TIGER roads, HydroSHEDS rivers and PAD-US protected areas.</p>
+          <p>The region is tiled into H3 hexagons. Earth Engine computes zonal means for each cell from NLCD land cover, 3DEP terrain, NAIP-derived 0.6 m canopy height, Hansen forest loss, Sentinel-2 seasonal indices, TIGER roads, HydroSHEDS rivers and PAD-US protected areas.</p>
           <p>The Geo-AI layer is a random forest trained to separate GAP 1–2 protected land from unprotected background. Distance-to-protected is excluded as a predictor. High probability on unprotected land flags places that look like what the region already protects.</p>
           <p>Each criterion is converted to a percentile rank from 0 to 1 across the region. Priority is the signed weighted sum, rescaled from 0 to 1. Corridors are least-cost paths across the hex graph with cell resistance <code>(1 − priority)^k</code>. Resistance is discounted through protected land and multiplied tenfold in heavily developed cells. The greenbelt network is the minimum spanning tree of least-cost links between the selected hubs.</p>
           <p>Hub locations are approximate and should be verified before reporting.</p>
@@ -144,8 +144,12 @@
           <option value="osm">OpenStreetMap</option>
           <option value="none">No basemap</option>
         </select>
+        <select id="eelayer" aria-label="Earth Engine layer"><option value="">Earth Engine layer: none</option></select>
+        <div class="param" id="ee-op-row" hidden><span>EE layer opacity</span><output id="o-eeop"></output>
+          <input type="range" id="ee-opacity" min="0.1" max="1" step="0.05" value="0.9"></div>
         <div class="param"><span>Hex opacity</span><output id="o-op"></output>
-          <input type="range" id="opacity" min="0.2" max="1" step="0.05" value="0.75"></div>
+          <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.75"></div>
+        <p class="hint" id="ee-note" hidden></p>
       </div>
       <div class="status" id="status" hidden></div>
       <div class="legend" id="legend"></div>

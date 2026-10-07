@@ -22,7 +22,6 @@ def raw_from_gee(grid, counties, cfg: Config) -> tuple[pd.DataFrame, dict]:
     from . import gee_layers as gl
     from .aggregate import reduce_cells
 
-    gl.init(cfg.gee.get("project"))
     aoi = gl.aoi_geometry(counties)
     stack, info = gl.build_stack(aoi, cfg)
     ai = None
@@ -32,11 +31,13 @@ def raw_from_gee(grid, counties, cfg: Config) -> tuple[pd.DataFrame, dict]:
         print("Geo-AI: pulling RF diagnostics ...")
         ai = gl.ai_metrics(diag)
         print(f"  holdout AUC = {ai['auc']}")
-    bands = ["forest", "developed", "relief", "canopy", "loss", "dist_water", "dist_road",
+    tiles = gl.tile_layers(aoi, stack, info) if cfg.raw.get("tiles", {}).get("enabled", True) else []
+    info.pop("_layers", None)
+    bands = ["forest", "developed", "relief", "canopy", "tall_canopy", "loss", "dist_water", "dist_road",
              "dist_protected", "protected", "protected_gap12"] + (["ai_suitability"] if ai else [])
     print(f"Reducing {len(bands)} bands over {len(grid)} cells ...")
     raw = reduce_cells(stack, grid, cfg, bands)
-    return raw, {"source": "gee", "ai": ai, **info}
+    return raw, {"source": "gee", "ai": ai, "tiles": tiles, **info}
 
 
 def raw_from_demo(grid, cfg: Config) -> tuple[pd.DataFrame, dict]:
@@ -74,7 +75,11 @@ def run(cfg: Config, demo: bool = False, res: int | None = None, county_source: 
     from .aoi import load_counties
 
     res = res or cfg.grid["h3_resolution"]
-    counties = counties if counties is not None else load_counties(cfg, county_source)
+    src = county_source or cfg.grid.get("county_source", "gee")
+    if not demo or (counties is None and src == "gee"):
+        from . import gee_layers as gl
+        gl.init(cfg.gee.get("project"))
+    counties = counties if counties is not None else load_counties(cfg, src)
     grid = build_grid(counties, res)
     print(f"Grid: {len(grid)} H3 r{res} cells across {grid['county'].nunique()} counties")
 
@@ -117,11 +122,31 @@ def write_web(df, norm, hubs, counties, cfg: Config, meta, res, out: Path) -> No
         "project": cfg.raw["project"], "criteria": crit, "scenarios": cfg.scenarios,
         "corridor": cfg.corridor, "hubs": hubs, "ai": meta.get("ai"),
         "protected_source": meta.get("protected_source"),
+        "tiles": meta.get("tiles") or [], "tiles_generated": dt.datetime.now().isoformat(timespec="seconds"),
         "county_outline": json.loads(cty[["fips", "name", "geometry"]]
                                      .assign(geometry=cty.geometry.simplify(0.003)).to_json()),
     }
     (out / "config.json").write_text(json.dumps(config, separators=(",", ":"), default=str))
     print(f"Web data -> {out} ({(out / 'cells.json').stat().st_size / 1e6:.2f} MB cells)")
+
+
+def refresh_tiles(cfg: Config, web_dir: Path = WEB_DIR) -> None:
+    """Regenerate EE map tile URLs only (they expire) and patch docs/data/config.json."""
+    from . import gee_layers as gl
+    from .aoi import load_counties
+
+    gl.init(cfg.gee.get("project"))
+    counties = load_counties(cfg)
+    aoi = gl.aoi_geometry(counties)
+    stack, info = gl.build_stack(aoi, cfg)
+    if cfg.ai.get("enabled", True):
+        stack = stack.addBands(gl.ai_suitability(stack, aoi, cfg)[0])
+    p = Path(web_dir) / "config.json"
+    conf = json.loads(p.read_text())
+    conf["tiles"] = gl.tile_layers(aoi, stack, info)
+    conf["tiles_generated"] = dt.datetime.now().isoformat(timespec="seconds")
+    p.write_text(json.dumps(conf, separators=(",", ":"), default=str))
+    print(f"Tiles refreshed -> {p}")
 
 
 def write_gis(df, norm, hubs, cfg: Config, out: Path) -> None:

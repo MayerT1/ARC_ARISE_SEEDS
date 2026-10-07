@@ -46,9 +46,9 @@ gee:
   assets:
     counties: TIGER/2018/Counties
     nlcd: USGS/NLCD_RELEASES/2021_REL/NLCD
-    dem: USGS/3DEP/10m
-    gedi: LARSE/GEDI/GEDI02_A_002_MONTHLY
-    hansen: UMD/hansen/global_forest_change_2023_v1_11
+    dem: USGS/3DEP/10m_collection
+    naip_chm: projects/naip-chm/assets/conus-structure-model   # cm, nodata 65535, 0.6 m
+    hansen: UMD/hansen/global_forest_change_2025_v1_13
     padus_fee: USGS/GAP/PAD-US/v20/fee
     padus_easement: USGS/GAP/PAD-US/v20/easement
     wdpa_fallback: WCMC/WDPA/current/polygons
@@ -70,7 +70,7 @@ ai:
   train_fraction: 0.7
   seed: 42
   # predictors deliberately exclude any distance-to-protected layer (leakage)
-  predictors: [forest, developed, wetwater, elevation, slope, relief,
+  predictors: [forest, developed, wetwater, elevation, slope, relief, chm_all,
                ndvi_summer, ndvi_winter, ndmi_summer, dist_road, dist_water]
 
 # ---------------------------------------------------------------- criteria
@@ -79,13 +79,14 @@ ai:
 # Sign of preference lives in the scenario weights (negative weight = avoid).
 criteria:
   forest_cover:        {label: Forest cover,             unit: "%",  group: Ecology,     src: NLCD 41/42/43}
-  canopy_height:       {label: Canopy height (GEDI RH98), unit: m,   group: Ecology,     src: GEDI L2A monthly}
+  canopy_height:       {label: Canopy height (NAIP CHM), unit: m,   group: Ecology,     src: NAIP CHM CONUS 0.6 m, vegetation-masked}
+  tall_canopy:         {label: Tall canopy (>=10 m),     unit: "%",  group: Ecology,     src: NAIP CHM CONUS 0.6 m}
   ai_suitability:      {label: Geo-AI conservation suitability, unit: p, group: Geo-AI, src: RF on S2+NLCD+3DEP, trained on PAD-US GAP 1-2}
   protected_proximity: {label: Proximity to protected land, unit: km, group: Connectivity, src: PAD-US fee+easement}
   riparian_proximity:  {label: Proximity to rivers/wetlands, unit: km, group: Ecology,  src: HydroSHEDS + JRC + NLCD 11/90/95}
   terrain_relief:      {label: Terrain relief,            unit: m,   group: Recreation,  src: 3DEP 10m (300 m local SD)}
   development:         {label: Development intensity,    unit: "%",  group: Pressure,    src: NLCD 21-24}
-  forest_loss:         {label: Forest loss 2001-2023,    unit: "%",  group: Pressure,    src: Hansen GFC}
+  forest_loss:         {label: Forest loss 2001-2025,    unit: "%",  group: Pressure,    src: Hansen GFC}
   road_proximity:      {label: Road access,              unit: km,   group: Recreation,  src: TIGER roads}
   gateway_proximity:   {label: Gateway community access, unit: km,   group: Tourism,     src: config/hubs.csv}
   hub_proximity:       {label: Recreation hub access,    unit: km,   group: Tourism,     src: config/hubs.csv}
@@ -100,7 +101,7 @@ scenarios:
               terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
   conservation:
     label: Conservation first
-    weights: {forest_cover: 25, canopy_height: 15, ai_suitability: 25, protected_proximity: 20,
+    weights: {forest_cover: 20, canopy_height: 10, tall_canopy: 10, ai_suitability: 25, protected_proximity: 20,
               riparian_proximity: 15, development: -20, road_proximity: -10, forest_loss: -5}
   recreation:
     label: Recreation & tourism
@@ -116,6 +117,10 @@ scenarios:
               terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
 
 # ---------------------------------------------------------------- corridor model
+# Earth Engine map tiles shown as overlays in the web tool (URLs expire; refresh: python -m seeds_cds tiles)
+tiles:
+  enabled: true
+
 corridor:
   cost_exponent: 2          # cost = (1 - priority)^k + eps
   eps: 0.02

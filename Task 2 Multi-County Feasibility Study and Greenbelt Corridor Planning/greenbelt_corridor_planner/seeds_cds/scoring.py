@@ -16,6 +16,7 @@ from .grid import haversine_km
 CRITERIA_SOURCE: dict[str, tuple[str, int]] = {
     "forest_cover": ("forest", 1),
     "canopy_height": ("canopy", 1),
+    "tall_canopy": ("tall_canopy", 1),
     "ai_suitability": ("ai_suitability", 1),
     "protected_proximity": ("dist_protected", -1),
     "riparian_proximity": ("dist_water", -1),

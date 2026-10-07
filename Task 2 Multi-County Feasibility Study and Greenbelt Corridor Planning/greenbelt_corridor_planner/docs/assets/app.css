@@ -164,7 +164,8 @@ th.n { text-align: right; }
   position: absolute; z-index: 500; right: 12px; top: 12px; background: var(--panel); border: 1px solid var(--rule);
   border-radius: 8px; padding: 6px; box-shadow: var(--shadow); display: grid; gap: 6px; font-size: 13px;
 }
-.mapctl select { font-size: 13px; padding: 4px 6px; }
+.mapctl select { font-size: 13px; padding: 4px 6px; max-width: 260px; }
+.mapctl .hint { font-size: 12px; max-width: 260px; }
 .status {
   position: absolute; z-index: 500; left: 50%; transform: translateX(-50%); top: 12px; background: var(--ink);
   color: var(--panel); padding: 5px 12px; border-radius: 99px; font-size: 13px; box-shadow: var(--shadow);

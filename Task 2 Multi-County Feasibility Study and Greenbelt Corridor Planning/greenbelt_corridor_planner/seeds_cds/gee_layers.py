@@ -89,16 +89,15 @@ def build_stack(aoi: ee.Geometry, cfg) -> tuple[ee.Image, dict]:
     developed = nlcd.remap([21, 22, 23, 24], [0.25, 0.5, 0.75, 1.0], 0).rename("developed")
     wetwater = nlcd.remap([11, 90, 95], [1, 1, 1], 0).rename("wetwater")
 
-    dem = ee.Image(A["dem"]).select("elevation")
+    dem = dem_mosaic(aoi, A["dem"])
     dem30 = dem.reduceResolution(ee.Reducer.mean(), maxPixels=64).reproject(_proj(30))
     slope = ee.Terrain.slope(dem30).rename("slope")
     relief = dem30.reduceNeighborhood(ee.Reducer.stdDev(), ee.Kernel.circle(300, "meters")).rename("relief")
 
-    gedi = (
-        ee.ImageCollection(A["gedi"]).filterBounds(aoi)
-        .map(lambda i: i.updateMask(i.select("quality_flag").eq(1)).updateMask(i.select("degrade_flag").eq(0)))
-        .select("rh98").median().rename("canopy")
-    )
+    chm = naip_chm(aoi, A["naip_chm"])                      # m, all elevated features
+    veg = nlcd.remap([41, 42, 43, 52, 90], [1, 1, 1, 1, 1], 0).eq(1)
+    canopy = chm.updateMask(veg).rename("canopy")          # vegetation-only canopy height
+    tall = chm.gte(10).And(veg).rename("tall_canopy")      # 0/1 -> cell mean = fraction
 
     hansen = ee.Image(A["hansen"])
     loss = hansen.select("loss").updateMask(hansen.select("datamask").eq(1)).rename("loss")
@@ -117,7 +116,7 @@ def build_stack(aoi: ee.Geometry, cfg) -> tuple[ee.Image, dict]:
     stack = ee.Image.cat(
         forest, developed, wetwater,
         dem30.rename("elevation"), slope, relief,
-        gedi, loss,
+        canopy, tall, chm.unmask(0).rename("chm_all"), loss,
         s2s.select("ndvi").rename("ndvi_summer"), s2s.select("ndmi").rename("ndmi_summer"),
         s2w.select("ndvi").rename("ndvi_winter"),
         distance_km(ee.Image(0).byte().paint(roads, 1), ds, nb).rename("dist_road"),
@@ -125,7 +124,53 @@ def build_stack(aoi: ee.Geometry, cfg) -> tuple[ee.Image, dict]:
         distance_km(prot, ds, nb).rename("dist_protected"),
         prot.rename("protected"), gap12.rename("protected_gap12"),
     ).clip(aoi)
+    info["_layers"] = {"nlcd": nlcd, "dem30": dem30, "chm": chm, "hansen": hansen, "prot": prot, "gap12": gap12}
     return stack, info
+
+
+def dem_mosaic(aoi, asset: str) -> ee.Image:
+    """3DEP 10m_collection mosaic with a real (10 m) default projection."""
+    col = ee.ImageCollection(asset).filterBounds(aoi).select("elevation")
+    return col.mosaic().setDefaultProjection(col.first().projection())
+
+
+def naip_chm(aoi, asset: str) -> ee.Image:
+    """NAIP CHM CONUS (gee-community-catalog): uint16 cm, nodata 65535 -> metres."""
+    col = ee.ImageCollection(asset).filterBounds(aoi)
+    first = col.first()
+    img = col.mosaic().setDefaultProjection(first.projection())
+    return img.updateMask(img.neq(65535)).divide(100).rename("chm")
+
+
+# ---------------------------------------------------------------- map tiles for the web tool
+VIRIDIS = ["440154", "482777", "3f4a8a", "31688e", "26828e", "1f9e89", "35b779", "6ece58", "fde725"]
+
+
+def tile_layers(aoi: ee.Geometry, stack: ee.Image, info: dict) -> list[dict]:
+    """getMapId tile URL templates for raster overlays. URLs expire; rerun `seeds_cds tiles` to refresh."""
+    L = info["_layers"]
+    defs = [
+        ("naip_chm", "Canopy height, NAIP CHM 0.6 m (m)", L["chm"].clip(aoi),
+         {"min": 0, "max": 30, "palette": VIRIDIS}),
+        ("nlcd", "NLCD land cover", L["nlcd"].clip(aoi), {}),
+        ("hillshade", "Hillshade, 3DEP 10 m", ee.Terrain.hillshade(L["dem30"]).clip(aoi), {"min": 120, "max": 230}),
+        ("forest_loss", "Forest loss year 2001-2025 (Hansen)",
+         L["hansen"].select("lossyear").selfMask().clip(aoi), {"min": 1, "max": 25, "palette": ["fee08b", "f46d43", "a50026"]}),
+        ("protected", "Protected land (GAP 1-2 dark, all light)",
+         L["prot"].add(L["gap12"]).selfMask().clip(aoi), {"min": 1, "max": 2, "palette": ["9ecae1", "08519c"]}),
+    ]
+    if "ai_suitability" in stack.bandNames().getInfo():
+        defs.insert(0, ("ai_suitability", "Geo-AI conservation suitability (RF prob.)",
+                        stack.select("ai_suitability"), {"min": 0, "max": 1, "palette": VIRIDIS}))
+    out = []
+    for key, label, img, vis in defs:
+        try:
+            url = img.getMapId(vis)["tile_fetcher"].url_format
+            out.append({"key": key, "label": label, "url": url})
+            print(f"  tiles: {key}")
+        except Exception as e:  # one bad layer shouldn't kill the run
+            print(f"  tiles: {key} skipped ({e})")
+    return out
 
 
 # ---------------------------------------------------------------- Geo-AI

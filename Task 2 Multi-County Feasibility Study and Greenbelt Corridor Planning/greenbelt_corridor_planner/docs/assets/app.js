@@ -78,6 +78,30 @@
     baseLayer = BASEMAPS[key] ? L.tileLayer(BASEMAPS[key][0], { ...BASEMAPS[key][1], opacity: 0.85 }).addTo(map) : null;
   }
 
+  // Earth Engine raster overlays (getMapId tile URLs written by the pipeline)
+  map.createPane("ee").style.zIndex = 300;
+  let eeLayer = null;
+  const eeSel = $("#eelayer"), eeNote = $("#ee-note");
+  (CFG.tiles || []).forEach((t) => eeSel.append(new Option(t.label, t.key)));
+  if (!(CFG.tiles || []).length) eeSel.hidden = true;
+  function setEE(key) {
+    if (eeLayer) map.removeLayer(eeLayer);
+    eeLayer = null;
+    const t = (CFG.tiles || []).find((x) => x.key === key);
+    $("#ee-op-row").hidden = !t;
+    eeNote.hidden = !t;
+    if (!t) return;
+    eeLayer = L.tileLayer(t.url, { pane: "ee", maxZoom: 18, opacity: +$("#ee-opacity").value,
+      attribution: "Google Earth Engine" }).addTo(map);
+    const age = CFG.tiles_generated ? Math.round((Date.now() - Date.parse(CFG.tiles_generated)) / 36e5) : null;
+    eeNote.textContent = `Tiles generated ${age != null ? age + " h ago" : ""}. If the layer is blank, the URLs have expired: run python -m seeds_cds tiles.`;
+    let errs = 0;
+    eeLayer.on("tileerror", () => { if (++errs === 4) eeNote.textContent = "Tiles failed to load. They have probably expired: run python -m seeds_cds tiles, then reload."; });
+  }
+  eeSel.addEventListener("change", () => setEE(eeSel.value));
+  $("#ee-opacity").addEventListener("input", (e) => { $("#o-eeop").textContent = (+e.target.value).toFixed(2); eeLayer?.setOpacity(+e.target.value); });
+  $("#o-eeop").textContent = "0.90";
+
   const hexLayer = L.layerGroup().addTo(map);
   const polys = C.h3.map((h, i) =>
     L.polygon(h3.cellToBoundary(h), { renderer, weight: 0.4, fillOpacity: S.opacity })
@@ -321,7 +345,7 @@
         || (S.topOnly && priority[i] < q80);
       polys[i].setStyle(hide
         ? { fillOpacity: 0, opacity: 0 }
-        : { fillColor: ramp(value(i)), fillOpacity: S.opacity, color: stroke, opacity: 0.6, weight: 0.4 });
+        : { fillColor: ramp(value(i)), fillOpacity: S.opacity, color: stroke, opacity: Math.min(0.6, S.opacity), weight: 0.4 });
     }
     outline.setStyle({ color: bm.value === "imagery" ? "#ffffff" : tok("--ink"), opacity: 0.9 });
   }
