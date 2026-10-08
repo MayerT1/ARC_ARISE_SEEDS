@@ -20,6 +20,9 @@ def main(out="seeds_planner_bundle.html", preview=False):
                         f"<style>{read('assets/vendor/leaflet.css')}</style>")
     html = html.replace('<link rel="stylesheet" href="../assets/app.css">', f"<style>{read('assets/app.css')}</style>")
     data = {"cells": json.loads(read("data/cells.json")), "config": json.loads(read("data/config.json"))}
+    for k in ("network", "padus", "parcels"):
+        f = DOCS / "data" / f"{k}.json"
+        data[k] = json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
     boot = f"<script>window.SEEDS_DATA={json.dumps(data, separators=(',', ':'))};" \
            f"window.SEEDS_PREVIEW={str(preview).lower()};</script>"
     for src in ["vendor/leaflet.js", "vendor/h3-js.umd.js", "engine.js", "app.js"]:

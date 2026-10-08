@@ -70,3 +70,17 @@ def synth_ai_metrics() -> dict:
                        "dist_water": 0.02, "wetwater": 0.01},
         "auc": None, "n_test": 0, "note": "synthetic placeholder — run pipeline with GEE for real values",
     }
+
+
+def synth_padus(cfg) -> list[dict]:
+    """Circles around park hubs labelled as synthetic public land. NOT real ownership data."""
+    import math
+    feats = []
+    for h in cfg.hubs_of("park"):
+        r = 0.02
+        ring = [[h.lon + 1.2 * r * math.cos(a), h.lat + r * math.sin(a)] for a in [i * math.pi / 12 for i in range(25)]]
+        feats.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]},
+                      "properties": {"Unit_Nm": f"{h.name} (synthetic)", "Own_Type": "STAT", "Own_Name": "SDNR",
+                                     "Mang_Name": "SPR", "Pub_Access": "OA", "GAP_Sts": "2", "Category": "Fee",
+                                     "GIS_Acres": 900}})
+    return feats

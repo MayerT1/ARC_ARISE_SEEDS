@@ -26,6 +26,7 @@
   .task .go { grid-row: 1 / span 3; grid-column: 3; align-self: center; }
   .task.live { background: color-mix(in srgb, var(--forest) 9%, var(--panel)); }
   .task.live .id { color: var(--forest); }
+  .task .shot { grid-column: 1 / -1; width: 100%; border: 1px solid var(--rule); border-radius: 6px; margin-top: 10px; }
   .cta { display: inline-block; text-decoration: none; padding: 9px 14px; border-radius: 6px; font-weight: 600;
     background: var(--forest); color: var(--panel); white-space: nowrap; }
   .soon { font: 12px var(--f-mono); color: var(--muted); border: 1px dashed var(--rule); padding: 5px 9px; border-radius: 6px; white-space: nowrap; }
@@ -59,8 +60,9 @@
       </div>
       <div class="task live">
         <span class="id">T2+3</span><h3>Feasibility study, greenbelt corridor plan &amp; Geo-AI decision support</h3>
-        <p>GIS land prioritization, a Geo-AI conservation suitability model and least-cost greenbelt corridors, combined in one interactive planner with scenario weights.</p>
+        <p>Land prioritization with a Geo-AI conservation model, existing trail and street networks, and public land ownership. Greenbelt corridors follow existing trails and flag the gaps and parcels that need new trail, an easement or a purchase. Stakeholders can comment directly on the map.</p>
         <span class="when">Oct 2026 – Mar 2028</span><span class="go"><a class="cta" href="tool/">Open planner</a></span>
+        <img class="shot" src="assets/greenbelt_corridor_planner.png" alt="Greenbelt Corridor Planner showing priority hexagons and trail-following corridors" onerror="this.remove()">
       </div>
       <div class="task">
         <span class="id">T4</span><h3>Economic impact assessment design</h3>
@@ -78,7 +80,8 @@
   <section class="cols">
     <div>
       <h2>How the planner works</h2>
-      <p>Each criterion is summarized on an H3 hexagon grid in Earth Engine and ranked across the region. Planners weight the criteria to build a priority surface and connect recreation hubs and gateway communities with least-cost corridors. The planner then lists unprotected high-priority cells inside each corridor for easement or acquisition review.</p>
+      <p>Each criterion is summarized on an H3 hexagon grid in Earth Engine and ranked across the region. Planners weight the criteria to build a priority surface. Corridors then connect recreation hubs and gateway communities over the real trail, greenway and street network. They add new trail only where there is a gap, and show who owns the land along the way.</p>
+      <p><a href="https://github.com/MayerT1/ARC_ARISE_SEEDS/blob/main/Task%202%20Multi-County%20Feasibility%20Study%20and%20Greenbelt%20Corridor%20Planning/greenbelt_corridor_planner/FACT_SHEET.md">Read the fact sheet</a> for the full method and data.</p>
     </div>
     <div>
       <h2>Project counties · ARC status</h2>

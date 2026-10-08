@@ -11,7 +11,27 @@ ALBERS = "EPSG:5070"
 
 # ---------------------------------------------------------------- setup
 def init(project: str | None = None) -> None:
+    """Initialise Earth Engine. Uses a service account when EE_SERVICE_ACCOUNT_KEY is set
+    (JSON key text or a path to the key file; used by the scheduled GitHub Action)."""
+    import json
+    import os
+
+    key = os.environ.get("EE_SERVICE_ACCOUNT_KEY")
+    if key:
+        info = json.loads(open(key).read() if os.path.exists(key) else key)
+        creds = ee.ServiceAccountCredentials(info["client_email"], key_data=json.dumps(info))
+        ee.Initialize(creds, project=project or info.get("project_id"))
+        return
+    project = project or os.environ.get("EE_PROJECT")
+    if not project:
+        raise SystemExit("Earth Engine project not set. Use --project <gcp-project>, set gee.project in "
+                         "config/seeds.yaml, or set the EE_PROJECT environment variable.")
     try:
+        ee.Initialize(project=project)
+    except ee.EEException as e:
+        if "not registered" in str(e) or "Not signed up" in str(e):
+            raise SystemExit(f"Earth Engine refused project '{project}': {e}")
+        ee.Authenticate()
         ee.Initialize(project=project)
     except Exception:  # first run on a machine / Colab
         ee.Authenticate()
@@ -231,3 +251,36 @@ def auc(y, p) -> float:
         return float("nan")
     r1 = sum(r for r, (_, yy) in zip(ranks, pairs) if yy == 1)
     return (r1 - n1 * (n1 + 1) / 2) / (n1 * n0)
+
+
+# ---------------------------------------------------------------- PAD-US ownership export (web layer)
+PADUS_PROPS = ["Unit_Nm", "Loc_Nm", "Own_Type", "Own_Name", "Loc_Own", "Mang_Type", "Mang_Name", "Loc_Mang",
+               "Des_Tp", "Category", "GAP_Sts", "Pub_Access", "GIS_Acres", "EsmtHldr"]
+
+
+def padus_features(aoi: ee.Geometry, A: dict, page: int = 2000) -> list[dict]:
+    """PAD-US fee + easement polygons clipped to the AOI, simplified, with ownership attributes."""
+    feats = []
+    for key, cat in (("padus_fee", "Fee"), ("padus_easement", "Easement")):
+        asset = A.get(key)
+        if not asset or not asset_ok(asset):
+            continue
+        fc = ee.FeatureCollection(asset).filterBounds(aoi)
+        n = fc.size().getInfo()
+        if not n:
+            continue
+        names = set(ee.Feature(fc.first()).propertyNames().getInfo())
+        keep = [p for p in PADUS_PROPS if p in names]
+
+        def clean(f, keep=keep, cat=cat):
+            g = f.geometry().intersection(aoi, 30).simplify(30)
+            return ee.Feature(g, f.toDictionary(keep)).set("Category", cat)
+
+        lst = fc.map(clean).toList(n)
+        for off in range(0, n, page):
+            got = ee.FeatureCollection(lst.slice(off, off + page)).getInfo()["features"]
+            feats += [f for f in got if f.get("geometry")]
+        print(f"  PAD-US {cat}: {n} units")
+    for f in feats:
+        f.pop("id", None)
+    return feats

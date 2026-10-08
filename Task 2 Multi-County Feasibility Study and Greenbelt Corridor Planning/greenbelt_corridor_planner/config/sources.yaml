@@ -1,0 +1,134 @@
+# Public data source registry: trails, roads, walkable spaces, parcels.
+#
+# Every source is pulled by `python -m seeds_cds run` / `network` (trails, roads, walkable spaces)
+# or live by the web planner + `python -m seeds_cds parcels` (parcels).
+# Check every endpoint from your machine with:   python -m seeds_cds sources
+#
+# status:  verified  = endpoint + schema confirmed
+#          verify    = endpoint found, schema/layer to confirm with `seeds_cds sources`
+#          needed    = no public endpoint found; get a URL or file from the data owner
+#
+# type:    overpass | arcgis | file
+#   arcgis: url = MapServer/FeatureServer root or a layer URL (…/MapServer/3).
+#           layer_match = case-insensitive substring of the layer name when url is a service root;
+#           layer_exclude = regex of layer names to skip (default label|anno|text|point);
+#           layer = fixed layer id (overrides matching). Among matches the layer with most features in the AOI wins.
+#   file:   any GeoJSON / GPKG / SHP path (relative to this planner folder).
+
+# --------------------------------------------------------------------------- trails + roads + walkable
+network:
+  - id: osm
+    label: OpenStreetMap (trails, greenways, sidewalks, roads, parks)
+    type: overpass
+    endpoints:
+      - https://overpass-api.de/api/interpreter
+      - https://overpass.kumi.systems/api/interpreter
+    owner: OpenStreetMap contributors (ODbL)
+    status: verified
+    note: Backbone. Includes most named systems (Singing River Trail built segments, Monte Sano/LTNA
+      preserves, Fiery Gizzard, Mountain Goat Trail, Sewanee Perimeter Trail, Cumberland Trail) as
+      mapped by volunteers. Completeness varies; conflated against official layers below.
+
+  - id: usgs_ndt
+    label: USGS National Digital Trails (aggregated federal/state/local trails)
+    type: arcgis
+    url: https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer
+    layer_match: trail
+    layer_exclude: label|anno|point
+    class: trail
+    owner: USGS National Digital Trails
+    status: verify
+    note: Layer id resolved by name. Alternative - TNM Downloader > Transportation > state GDB, then use type file.
+
+  - id: tn_state_park_trails
+    label: Tennessee State Parks trails (TDEC)
+    type: arcgis
+    url: https://tdeconline.tn.gov/arcgis/rest/services/TDEC_Trails/MapServer
+    layer_match: trail
+    class: trail
+    owner: Tennessee State Parks / TDEC
+    status: verify
+
+  - id: singing_river_trail
+    label: Singing River Trail (built + planned)
+    type: file
+    path: data_sources/trails/singing_river_trail.geojson
+    class: greenway
+    planned_field: status        # rows where this field contains "plan" are drawn as planned, not routed
+    owner: Singing River Trail / Land Trust of North Alabama
+    status: needed
+    note: Request alignment GIS from Singing River Trail (singingrivertrail.com). Drop the file at path.
+
+  - id: ltna_preserves_trails
+    label: Land Trust of North Alabama preserve trails
+    type: file
+    path: data_sources/trails/ltna_trails.geojson
+    class: trail
+    owner: Land Trust of North Alabama
+    status: needed
+
+  - id: sewanee_domain_trails
+    label: University of the South Domain trails (incl. Perimeter Trail)
+    type: file
+    path: data_sources/trails/sewanee_trails.geojson
+    class: trail
+    owner: University of the South
+    status: needed
+
+  - id: huntsville_greenways
+    label: City of Huntsville greenways
+    type: arcgis
+    url: null
+    layer_match: greenway
+    class: greenway
+    owner: City of Huntsville
+    status: needed
+
+  - id: local_extra
+    label: Any other county / city / non-profit trail files
+    type: file
+    path: data_sources/trails/*.geojson
+    class: trail
+    owner: various (file name used as source)
+    status: verify
+
+# --------------------------------------------------------------------------- parcels (ownership)
+# Parcels are queried live by the planner for the map view and the corridor, and in batch by
+# `python -m seeds_cds parcels`. Fields are auto-detected when left null.
+# PAD-US public/protected land ownership is always included (exported by the pipeline from Earth Engine).
+parcels:
+  - {id: madison_al,    fips: "01089", label: Madison Co. AL Assessor,  type: arcgis, url: null, status: needed}
+  - {id: marshall_al,   fips: "01095", label: Marshall Co. AL Assessor, type: arcgis, url: null, status: needed}
+  - {id: jackson_al,    fips: "01071", label: Jackson Co. AL Assessor,  type: arcgis, url: null, status: needed}
+  - id: tn_statewide
+    fips: ["47051", "47061", "47115", "47153", "47007", "47177", "47031", "47041", "47175"]
+    label: Tennessee Comptroller statewide parcels (TPAD)
+    type: arcgis
+    url: https://tnmap.tn.gov/arcgis/rest/services/CADASTRAL/STATEWIDE_PARCELS_WEB_MERCATOR/MapServer
+    layer_match: parcel
+    token_env: TNMAP_TOKEN       # service returns "Token Required"; request access from TN Comptroller / STS GIS
+    status: needed
+  - id: local_parcels
+    fips: any
+    label: Parcel files supplied by counties / Regrid export
+    type: file
+    path: data_sources/parcels/*.geojson
+    status: verify
+
+# Field auto-detection (first match wins, case-insensitive)
+parcel_fields:
+  id:       [PARCELID, PARCEL_ID, PIN, PPIN, APN, PARCELNO, PARCEL_NO, GISLINK, PARCEL]
+  owner:    [OWNER, OWNERNAME, OWNER_NAME, OWN_NAME, OWNER1, OWNNAME, NAME1]
+  acres:    [ACRES, GIS_ACRES, CALC_ACRE, CALCACRES, DEEDACRES, DEED_ACRES, ACREAGE, TOTAL_ACRES]
+  landuse:  [LANDUSE, LAND_USE, LUC, PROPCLASS, PROP_CLASS, CLASS, USECODE]
+  value:    [TOTALVALUE, TOTAL_VALUE, APPRAISED, APPR_VALUE, MARKETVAL, TOTALAPPR, LANDVALUE]
+  address:  [SITEADDR, SITE_ADDR, ADDRESS, PROPADDR, LOCATION]
+
+# Owner classification for acquisition screening (regex on owner name, first match wins)
+owner_classes:
+  Federal:   "UNITED STATES|USA |U S A|TENNESSEE VALLEY AUTH|\\bTVA\\b|NATIONAL PARK|FOREST SERVICE|ARMY|REDSTONE|CORPS OF ENG"
+  State:     "STATE OF|DEPT OF|DEPARTMENT OF|TDEC|WILDLIFE RESOURCES|CONSERVATION AND NATURAL|FOREVER WILD"
+  Local:     "CITY OF|COUNTY|TOWN OF|BOARD OF EDUC|PARKS AND REC|UTILIT|WATER AUTH"
+  Nonprofit: "LAND TRUST|CONSERVANCY|NATURE CONSERV|FOUNDATION|ASSOCIATION|UNIVERSITY OF THE SOUTH|TRUSTEES|CHURCH"
+  Utility:   "RAILROAD|RAILWAY|POWER|ELECTRIC|GAS CO|TELEPHONE|PIPELINE"
+  Private:   ".*"

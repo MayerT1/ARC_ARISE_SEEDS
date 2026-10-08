@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Greenbelt Corridor Planner</title>
-<meta name="description" content="SEEDS Tasks 2 + 3: GIS land prioritization, Geo-AI suitability and least-cost greenbelt corridor planning for 12 counties in NE Alabama and SE Tennessee.">
+<meta name="description" content="SEEDS Tasks 2 + 3: land prioritization, Geo-AI suitability, existing trail networks, land ownership and trail-following greenbelt corridors for 12 counties in NE Alabama and SE Tennessee.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
@@ -15,19 +15,24 @@
 <div class="app">
   <header class="bar">
     <div class="brand"><b>Greenbelt Corridor Planner</b><span>SEEDS · TASKS 2+3 · UAH</span></div>
-    <nav><a href="../">Project home</a><a href="#method" id="nav-method">Method</a></nav>
+    <nav>
+      <button class="btn primary" id="fb-start" type="button">Give feedback</button>
+      <a href="../">Project home</a><a href="#method" id="nav-method">Method</a>
+      <a id="nav-factsheet" href="#" target="_blank" rel="noopener">Fact sheet</a>
+    </nav>
   </header>
   <div class="banner" id="demo-banner" hidden>
-    Showing <b>synthetic demo criteria</b>. Values are illustrative only. Run
-    <code>python -m seeds_cds run</code> to load Earth Engine data.
+    Showing <b>synthetic demo data</b> (criteria, trails, roads and public land are illustrative only). Run
+    <code>python -m seeds_cds run</code> to load Earth Engine data and real trail networks.
   </div>
   <main class="shell">
     <aside class="panel">
       <div class="tabs" role="tablist">
         <button role="tab" id="t-priority" aria-selected="true" aria-controls="p-priority">Priority</button>
         <button role="tab" id="t-corridor" aria-selected="false" aria-controls="p-corridor">Corridors</button>
+        <button role="tab" id="t-land" aria-selected="false" aria-controls="p-land">Land</button>
         <button role="tab" id="t-county" aria-selected="false" aria-controls="p-county">Counties</button>
-        <button role="tab" id="t-ai" aria-selected="false" aria-controls="p-ai">Geo-AI</button>
+        <button role="tab" id="t-ai" aria-selected="false" aria-controls="p-ai">Data</button>
       </div>
 
       <!-- PRIORITY -->
@@ -38,7 +43,7 @@
           <div class="row">
             <label class="btn" for="import-weights">Import stakeholder weights</label>
             <input type="file" id="import-weights" accept=".json,application/json" hidden>
-            <button class="btn" id="export-weights">Save weights</button>
+            <button class="btn" id="export-weights" type="button">Save weights</button>
           </div>
           <p class="hint" id="weights-note">Slide right to favour a criterion, left to avoid it. Weights are normalized by their absolute sum.</p>
         </div>
@@ -56,8 +61,8 @@
         <div class="sec">
           <h3>Mode</h3>
           <div class="seg" id="mode">
-            <button aria-pressed="true" data-mode="network">Greenbelt network</button>
-            <button aria-pressed="false" data-mode="p2p">Point to point</button>
+            <button type="button" aria-pressed="true" data-mode="network">Greenbelt network</button>
+            <button type="button" aria-pressed="false" data-mode="p2p">Point to point</button>
           </div>
           <p class="hint" id="mode-hint"></p>
         </div>
@@ -67,32 +72,70 @@
         </div>
         <div class="sec" id="p2p-ctl" hidden>
           <h3>Route</h3>
-          <div class="row"><select id="p2p-from" aria-label="Start hub"></select></div>
-          <div class="row"><select id="p2p-to" aria-label="End hub"></select></div>
+          <div class="row"><select id="p2p-from" aria-label="Start"></select></div>
+          <div class="row"><select id="p2p-to" aria-label="End"></select></div>
           <p class="hint">Or click the map: first click sets the start, second sets the end.</p>
-        </div>
-        <div class="sec">
-          <h3>Resistance model</h3>
-          <div class="param"><span>Priority exponent</span><output id="o-exp"></output>
-            <input type="range" id="c-exp" min="1" max="4" step="0.5"></div>
-          <div class="param"><span>Discount through protected land</span><output id="o-disc"></output>
-            <input type="range" id="c-disc" min="0" max="0.9" step="0.05"></div>
-          <div class="param"><span>Development barrier above</span><output id="o-bar"></output>
-            <input type="range" id="c-bar" min="0.3" max="1" step="0.05"></div>
-          <div class="param"><span>Corridor zone width (rings)</span><output id="o-ring"></output>
-            <input type="range" id="c-ring" min="0" max="3" step="1"></div>
         </div>
         <div class="sec">
           <h3>Result</h3>
           <div class="stats" id="corr-stats"></div>
+          <div class="mix" id="corr-mix" aria-label="Corridor composition"></div>
+          <p class="hint" id="net-note"></p>
+        </div>
+        <div class="sec">
+          <h3>Routing costs <span class="k">per km</span></h3>
+          <div class="param"><span>Existing trails &amp; greenways</span><output id="o-trail"></output>
+            <input type="range" id="c-trail" min="0.02" max="1" step="0.02"></div>
+          <div class="param"><span>Sidewalks &amp; local streets</span><output id="o-street"></output>
+            <input type="range" id="c-street" min="0.1" max="3" step="0.05"></div>
+          <div class="param"><span>New trail construction</span><output id="o-new"></output>
+            <input type="range" id="c-new" min="0.2" max="5" step="0.1"></div>
+          <div class="param"><span>Discount through protected land</span><output id="o-disc"></output>
+            <input type="range" id="c-disc" min="0" max="0.9" step="0.05"></div>
+          <div class="param"><span>Development barrier above</span><output id="o-bar"></output>
+            <input type="range" id="c-bar" min="0.3" max="1" step="0.05"></div>
+          <p class="hint" id="cost-ratio"></p>
         </div>
         <div class="sec">
           <h3>Links</h3>
           <div class="tbl"><table id="links"></table></div>
         </div>
         <div class="sec">
-          <h3>Conservation candidates in corridor</h3>
-          <p class="hint">Unprotected cells inside the corridor zone, ranked by priority. These are the parcels to review for easements or acquisition.</p>
+          <h3>Gaps to close</h3>
+          <p class="hint">Stretches with no existing trail or walkable street. These need new trail, an easement or a purchase. Longest first.</p>
+          <div class="tbl"><table id="gaps"></table></div>
+        </div>
+        <div class="sec">
+          <h3>Export</h3>
+          <div class="row">
+            <button class="btn" id="dl-corr" type="button">Corridor GeoJSON</button>
+            <button class="btn" id="dl-gaps" type="button">Gaps CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAND -->
+      <div class="tabpane" id="p-land" role="tabpanel" hidden>
+        <div class="sec">
+          <h3>Land the corridor crosses</h3>
+          <div class="stats" id="land-stats"></div>
+        </div>
+        <div class="sec">
+          <h3>Public &amp; protected land on the route</h3>
+          <p class="hint">From PAD-US. Owner, manager and public access for each unit the corridor passes through.</p>
+          <div class="tbl"><table id="padus-tbl"></table></div>
+        </div>
+        <div class="sec">
+          <h3>Parcels &amp; owners</h3>
+          <p class="hint" id="parcel-note"></p>
+          <div class="row">
+            <button class="btn primary" id="parcel-run" type="button">Find parcels along corridor</button>
+            <button class="btn" id="dl-parcels" type="button" disabled>Parcels CSV</button>
+          </div>
+          <div class="tbl"><table id="parcel-tbl"></table></div>
+        </div>
+        <div class="sec">
+          <h3>High-priority unprotected cells near the corridor</h3>
           <div class="tbl"><table id="cands"></table></div>
         </div>
       </div>
@@ -102,57 +145,94 @@
         <div class="sec">
           <h3>County summary · current scenario</h3>
           <div class="tbl"><table id="county-tbl"></table></div>
-          <p class="hint">Top 20% = share of the county's cells in the regional top quintile. Corridor = cells in the corridor zone.</p>
+          <p class="hint">Top 20% = share of the county's cells in the regional top quintile. Trail km = existing trails and greenways mapped in the county.</p>
         </div>
         <div class="sec">
           <h3>Export</h3>
-          <div class="row">
-            <button class="btn" id="dl-cells">Cells GeoJSON</button>
-            <button class="btn" id="dl-corr">Corridor GeoJSON</button>
-            <button class="btn" id="dl-cands">Candidates CSV</button>
-          </div>
+          <div class="row"><button class="btn" id="dl-cells" type="button">Priority cells GeoJSON</button></div>
         </div>
       </div>
 
-      <!-- GEO-AI -->
+      <!-- DATA / GEO-AI -->
       <div class="tabpane" id="p-ai" role="tabpanel" hidden>
         <div class="sec">
-          <h3>Conservation suitability model</h3>
+          <h3>Geo-AI conservation suitability model</h3>
           <div class="stats" id="ai-stats"></div>
         </div>
         <div class="sec">
           <h3>Predictor importance</h3>
           <div class="bars" id="ai-imp"></div>
         </div>
+        <div class="sec">
+          <h3>Trail &amp; road network</h3>
+          <div class="tbl"><table id="net-tbl"></table></div>
+        </div>
+        <div class="sec">
+          <h3>Data sources</h3>
+          <div class="tbl"><table id="src-tbl"></table></div>
+        </div>
         <div class="sec method" id="method">
           <h3>Method</h3>
-          <p>The region is tiled into H3 hexagons. Earth Engine computes zonal means for each cell from NLCD land cover, 3DEP terrain, NAIP-derived 0.6 m canopy height, Hansen forest loss, Sentinel-2 seasonal indices, TIGER roads, HydroSHEDS rivers and PAD-US protected areas.</p>
-          <p>The Geo-AI layer is a random forest trained to separate GAP 1–2 protected land from unprotected background. Distance-to-protected is excluded as a predictor. High probability on unprotected land flags places that look like what the region already protects.</p>
-          <p>Each criterion is converted to a percentile rank from 0 to 1 across the region. Priority is the signed weighted sum, rescaled from 0 to 1. Corridors are least-cost paths across the hex graph with cell resistance <code>(1 − priority)^k</code>. Resistance is discounted through protected land and multiplied tenfold in heavily developed cells. The greenbelt network is the minimum spanning tree of least-cost links between the selected hubs.</p>
-          <p>Hub locations are approximate and should be verified before reporting.</p>
+          <p>The region is tiled into H3 hexagons of about 5 km². Earth Engine summarizes land cover, terrain, canopy height, forest loss, satellite vegetation indices, rivers and protected areas for every cell.</p>
+          <p>The Geo-AI layer is a random forest that learns what strictly protected land looks like. High scores on unprotected land flag places that resemble what the region already protects.</p>
+          <p>Each criterion is ranked across the region from 0 to 1. Your weights combine them into a priority score.</p>
+          <p>Corridors are least-cost routes over the real trail, greenway, sidewalk and street network from OpenStreetMap and official trail layers. Walking an existing trail is cheap, a quiet street costs more, and building new trail costs the most. New trail is cheaper through high-priority or protected land. Routes therefore follow existing trails and only add new connectors where there is a gap.</p>
+          <p>The full method, data list and limits are in the fact sheet.</p>
         </div>
       </div>
     </aside>
 
     <section class="mapwrap">
-      <div id="map" role="application" aria-label="Priority map"></div>
-      <div class="mapctl">
-        <select id="view" aria-label="Map layer"></select>
-        <select id="basemap" aria-label="Basemap">
-          <option value="topo">USGS Topo</option>
-          <option value="imagery">Imagery</option>
-          <option value="osm">OpenStreetMap</option>
-          <option value="none">No basemap</option>
-        </select>
-        <select id="eelayer" aria-label="Earth Engine layer"><option value="">Earth Engine layer: none</option></select>
-        <div class="param" id="ee-op-row" hidden><span>EE layer opacity</span><output id="o-eeop"></output>
-          <input type="range" id="ee-opacity" min="0.1" max="1" step="0.05" value="0.9"></div>
-        <div class="param"><span>Hex opacity</span><output id="o-op"></output>
-          <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.75"></div>
-        <p class="hint" id="ee-note" hidden></p>
+      <div id="map" role="application" aria-label="Planning map"></div>
+      <div class="mapctl" id="mapctl">
+        <button class="btn mapctl-toggle" id="mapctl-toggle" type="button" aria-expanded="true">Layers</button>
+        <div class="mapctl-body" id="mapctl-body">
+          <select id="view" aria-label="Hex layer"></select>
+          <div class="layers" id="layer-list"></div>
+          <select id="eelayer" aria-label="Earth Engine layer"><option value="">Earth Engine layer: none</option></select>
+          <div class="param" id="ee-op-row" hidden><span>EE layer opacity</span><output id="o-eeop"></output>
+            <input type="range" id="ee-opacity" min="0.1" max="1" step="0.05" value="0.9"></div>
+          <select id="basemap" aria-label="Basemap">
+            <option value="topo">USGS Topo</option>
+            <option value="imagery">Imagery</option>
+            <option value="osm">OpenStreetMap</option>
+            <option value="none">No basemap</option>
+          </select>
+          <div class="param"><span>Hex opacity</span><output id="o-op"></output>
+            <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.6"></div>
+          <p class="hint" id="ee-note" hidden></p>
+        </div>
       </div>
       <div class="status" id="status" hidden></div>
       <div class="legend" id="legend"></div>
+
+      <!-- feedback dialog -->
+      <div class="fb" id="fb" hidden role="dialog" aria-labelledby="fb-title">
+        <form id="fb-form">
+          <h3 id="fb-title">Feedback at this location</h3>
+          <p class="hint" id="fb-where"></p>
+          <label for="fb-topic">Topic</label>
+          <select id="fb-topic">
+            <option>Corridor route</option>
+            <option>Missing or wrong trail</option>
+            <option>Land ownership / parcel</option>
+            <option>Priority scoring</option>
+            <option>Other</option>
+          </select>
+          <label for="fb-text">Comment</label>
+          <textarea id="fb-text" rows="4" required placeholder="What should planners know about this place?"></textarea>
+          <div class="row2">
+            <div><label for="fb-name">Name (optional)</label><input id="fb-name" type="text" autocomplete="name"></div>
+            <div><label for="fb-org">Organization (optional)</label><input id="fb-org" type="text" autocomplete="organization"></div>
+          </div>
+          <p class="hint">Your current scenario, weights and routing settings are attached so planners can reproduce what you saw.</p>
+          <div class="row">
+            <button class="btn primary" type="submit">Send feedback</button>
+            <button class="btn" type="button" id="fb-cancel">Cancel</button>
+          </div>
+          <div id="fb-result" class="hint" hidden></div>
+        </form>
+      </div>
     </section>
   </main>
 </div>

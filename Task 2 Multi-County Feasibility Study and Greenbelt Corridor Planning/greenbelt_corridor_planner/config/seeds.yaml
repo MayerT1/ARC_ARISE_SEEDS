@@ -4,7 +4,7 @@
 project:
   name: SEEDS Greenbelt Corridor Decision Support
   short: SEEDS-CDS
-  version: 0.1.0
+  version: 0.2.1
 
 # ---------------------------------------------------------------- AOI
 counties:
@@ -37,7 +37,7 @@ grid:
 
 # ---------------------------------------------------------------- Earth Engine
 gee:
-  project: null           # GCP project for ee.Initialize(project=...)
+  project: servir-sco-assets   # GCP project for Earth Engine (or --project / EE_PROJECT)
   scale: 30               # reduceRegions scale (m)
   distance_scale: 90      # scale for distance transforms (m)
   distance_neighborhood: 512
@@ -91,6 +91,9 @@ criteria:
   gateway_proximity:   {label: Gateway community access, unit: km,   group: Tourism,     src: config/hubs.csv}
   hub_proximity:       {label: Recreation hub access,    unit: km,   group: Tourism,     src: config/hubs.csv}
   arc_need:            {label: ARC economic need,        unit: idx,  group: Equity,      src: ARC FY26 county status}
+  trail_density:       {label: Existing trail density,   unit: km/km2, group: Trails,    src: OSM + official trail layers (config/sources.yaml)}
+  trail_proximity:     {label: Proximity to existing trails, unit: km, group: Trails,    src: OSM + official trail layers}
+  walkable_proximity:  {label: Proximity to parks & walkable spaces, unit: km, group: Trails, src: OSM parks / nature reserves / recreation grounds}
 
 # ---------------------------------------------------------------- scenarios
 # Weights are signed, any scale; tool normalises by sum(|w|).
@@ -98,15 +101,15 @@ scenarios:
   balanced:
     label: Balanced (default)
     weights: {forest_cover: 20, ai_suitability: 20, protected_proximity: 15, riparian_proximity: 10,
-              terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
+              terrain_relief: 10, gateway_proximity: 10, arc_need: 10, trail_proximity: 10, development: -15}
   conservation:
     label: Conservation first
     weights: {forest_cover: 20, canopy_height: 10, tall_canopy: 10, ai_suitability: 25, protected_proximity: 20,
               riparian_proximity: 15, development: -20, road_proximity: -10, forest_loss: -5}
   recreation:
     label: Recreation & tourism
-    weights: {terrain_relief: 20, gateway_proximity: 25, road_proximity: 15, hub_proximity: 20,
-              forest_cover: 10, riparian_proximity: 10, development: -10}
+    weights: {terrain_relief: 15, gateway_proximity: 20, trail_density: 15, trail_proximity: 15, hub_proximity: 15,
+              walkable_proximity: 10, forest_cover: 10, riparian_proximity: 10, development: -10}
   equity:
     label: Equity & workforce (ARC need)
     weights: {arc_need: 30, gateway_proximity: 20, forest_cover: 15, hub_proximity: 15,
@@ -116,14 +119,44 @@ scenarios:
     weights: {forest_cover: 20, ai_suitability: 20, protected_proximity: 15, riparian_proximity: 10,
               terrain_relief: 10, gateway_proximity: 10, arc_need: 10, development: -15}
 
-# ---------------------------------------------------------------- corridor model
-# Earth Engine map tiles shown as overlays in the web tool (URLs expire; refresh: python -m seeds_cds tiles)
+# ---------------------------------------------------------------- Earth Engine overlay tiles
+# URLs expire; refresh with: python -m seeds_cds tiles
 tiles:
   enabled: true
 
+# ---------------------------------------------------------------- existing trail / road network
+network:
+  sources: config/sources.yaml
+  tile_deg: 0.25             # Overpass bbox tile size (degrees)
+  aoi_buffer_km: 3           # keep trails just outside the counties so cross-border links survive
+  road_classes: [road_local, road_collector, road_arterial]   # drop road_local to shrink the web payload
+  simplify_m: 5              # display geometry Douglas-Peucker tolerance
+  conflate_m: 20             # official line within this distance of an OSM way = same trail
+  min_component_km: 0.3      # drop isolated fragments shorter than this (unless named)
+  gap_max_km: 2.5            # longest new connector considered between trail ends / trail and road
+  gap_k: 4                   # candidate connectors per trail end
+
+# ---------------------------------------------------------------- corridor routing
+# Cost of a route = sum(km x factor). Existing trail is cheap, building new trail is expensive,
+# so least-cost corridors follow existing trails and add new connectors only where gaps exist.
 corridor:
-  cost_exponent: 2          # cost = (1 - priority)^k + eps
-  eps: 0.02
-  protected_discount: 0.5   # cost multiplier reduction for cells >50% protected
-  development_barrier: 0.6  # normalised development above this = barrier (x10 cost)
-  zone_rings: 1             # corridor zone = path + k-ring
+  cost:
+    greenway: 0.08           # paved shared-use path / cycleway / named greenway
+    trail: 0.12              # natural-surface trail, track, bridleway
+    sidewalk: 0.35           # sidewalk, pedestrian street, crossing
+    road_local: 0.6          # residential / unclassified street (share the road)
+    road_collector: 1.5      # tertiary / secondary
+    road_arterial: 4.0       # primary / trunk
+    new: 1.0                 # new-build connector across land, x land resistance below
+  cost_exponent: 2           # land resistance = 0.5 + 1.5 * (1 - priority)^k  (0.5 best land .. 2.0 worst)
+  protected_discount: 0.5    # new build through >50% protected cells costs (1 - this)
+  development_barrier: 0.6   # new build through cells above this development percentile x10
+  hub_snap_km: 1.5           # hubs attach to network nodes within this distance
+  zone_rings: 1              # corridor zone for statistics = route cells + k-ring
+
+# ---------------------------------------------------------------- web app
+web:
+  repo: MayerT1/ARC_ARISE_SEEDS
+  feedback_endpoint: null    # Google Apps Script web-app URL (see feedback/apps_script.gs)
+  parcel_min_zoom: 14
+  road_min_zoom: 12

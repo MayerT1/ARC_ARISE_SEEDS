@@ -1,0 +1,42 @@
+name: Refresh Earth Engine tiles
+
+# Earth Engine overlay tile URLs expire. This renews them daily and commits docs/data/config.json.
+# Setup:
+#   1. Google Cloud console (project used for Earth Engine) > IAM > Service accounts > create one,
+#      grant "Earth Engine Resource Viewer" + "Service Usage Consumer", create a JSON key.
+#   2. Register the service account for Earth Engine (https://code.earthengine.google.com/register).
+#   3. GitHub repo > Settings > Secrets and variables > Actions:
+#        secret   EE_SERVICE_ACCOUNT_KEY = full JSON key text
+#        variable EE_PROJECT             = your GCP project id
+on:
+  schedule:
+    - cron: "17 10 * * *"   # daily 10:17 UTC (~5 am Central)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PLANNER: "Task 2 Multi-County Feasibility Study and Greenbelt Corridor Planning/greenbelt_corridor_planner"
+
+jobs:
+  tiles:
+    runs-on: ubuntu-latest
+    if: ${{ vars.EE_PROJECT != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install earthengine-api geopandas shapely h3 pyyaml pandas numpy
+      - name: Refresh tiles
+        working-directory: ${{ env.PLANNER }}
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+        run: python -m seeds_cds tiles --project "${{ vars.EE_PROJECT }}"
+      - name: Commit
+        run: |
+          git config user.name "seeds-bot"
+          git config user.email "seeds-bot@users.noreply.github.com"
+          git add "$PLANNER/docs/data/config.json"
+          git diff --cached --quiet || (git commit -m "Refresh Earth Engine tiles" && git push)
