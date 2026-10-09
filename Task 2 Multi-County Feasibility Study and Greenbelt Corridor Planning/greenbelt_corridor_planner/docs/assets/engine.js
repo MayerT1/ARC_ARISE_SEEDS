@@ -138,41 +138,60 @@
     const out = [];
     if (hex != null && hex >= 0) out.push([hex, haversineKm([lat, lon], [g.lat[hex], g.lon[hex]]) * P.cost.new * lr[hex]]);
     if (g.M) {
-      const d = [];
-      for (let i = 0; i < g.M; i++) d.push([haversineKm([lat, lon], [g.lat[g.H + i], g.lon[g.H + i]]), i]);
-      d.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
-      for (const [km, i] of d.slice(0, 5)) if (km <= P.hub_snap_km) out.push([g.H + i, km * P.cost.road_local]);
+      // nearest 5 network nodes (linear scan, no full sort); cheap bbox prefilter in degrees
+      const top = [], dLat = P.hub_snap_km / 111, dLon = P.hub_snap_km / (111 * Math.cos((lat * Math.PI) / 180));
+      for (let i = 0; i < g.M; i++) {
+        const la = g.lat[g.H + i], lo = g.lon[g.H + i];
+        if (Math.abs(la - lat) > dLat || Math.abs(lo - lon) > dLon) continue;
+        const km = haversineKm([lat, lon], [la, lo]);
+        if (km > P.hub_snap_km) continue;
+        if (top.length < 5 || km < top[top.length - 1][0] || (km === top[top.length - 1][0] && i < top[top.length - 1][1])) {
+          top.push([km, i]);
+          top.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+          if (top.length > 5) top.pop();
+        }
+      }
+      for (const [km, i] of top) out.push([g.H + i, km * P.cost.road_local]);
     }
     return out;
   }
 
-  function Heap() { this.a = []; }
+  // binary min-heap on parallel typed arrays (no per-push allocation)
+  function Heap(cap) { this.k = new Float64Array(cap); this.v = new Int32Array(cap); this.n = 0; }
   Heap.prototype.push = function (d, i) {
-    const a = this.a; a.push([d, i]); let k = a.length - 1;
-    while (k) { const p = (k - 1) >> 1; if (a[p][0] <= a[k][0]) break; [a[p], a[k]] = [a[k], a[p]]; k = p; }
+    if (this.n === this.k.length) { const k = new Float64Array(this.n * 2), v = new Int32Array(this.n * 2); k.set(this.k); v.set(this.v); this.k = k; this.v = v; }
+    const K = this.k, V = this.v; let c = this.n++;
+    while (c) { const p = (c - 1) >> 1; if (K[p] <= d) break; K[c] = K[p]; V[c] = V[p]; c = p; }
+    K[c] = d; V[c] = i;
   };
-  Heap.prototype.pop = function () {
-    const a = this.a, top = a[0], last = a.pop();
-    if (a.length) {
-      a[0] = last; let k = 0;
-      for (;;) {
-        const l = 2 * k + 1, r = l + 1; let m = k;
-        if (l < a.length && a[l][0] < a[m][0]) m = l;
-        if (r < a.length && a[r][0] < a[m][0]) m = r;
-        if (m === k) break; [a[m], a[k]] = [a[k], a[m]]; k = m;
-      }
+  Heap.prototype.pop = function () {   // returns node; key in this.top
+    const K = this.k, V = this.v, rv = V[0]; this.top = K[0];
+    const n = --this.n, d = K[n], i = V[n]; let c = 0;
+    for (;;) {
+      let m = 2 * c + 1; if (m >= n) break;
+      if (m + 1 < n && K[m + 1] < K[m]) m++;
+      if (K[m] >= d) break;
+      K[c] = K[m]; V[c] = V[m]; c = m;
     }
-    return top;
+    if (n) { K[c] = d; V[c] = i; }
+    return rv;
   };
 
-  function dijkstra(g, seedList, cost) {
-    const dist = new Float64Array(g.n).fill(Infinity), pe = new Int32Array(g.n).fill(-1), h = new Heap();
+  // targets (optional): stop once every target node is settled
+  function dijkstra(g, seedList, cost, targets) {
+    const dist = new Float64Array(g.n).fill(Infinity), pe = new Int32Array(g.n).fill(-1), done = new Uint8Array(g.n);
+    const h = new Heap(1 << 16);
     for (const [s, c] of seedList) if (c < dist[s]) { dist[s] = c; h.push(c, s); }
-    while (h.a.length) {
-      const [d, u] = h.pop();
-      if (d > dist[u]) continue;
-      for (let k = g.off[u]; k < g.off[u + 1]; k++) {
-        const e = g.adj[k], v = g.a[e] === u ? g.b[e] : g.a[e], nd = d + cost[e];
+    let left = -1, want = null;
+    if (targets && targets.length) { want = new Uint8Array(g.n); for (const t of targets) if (!want[t]) { want[t] = 1; left = (left < 0 ? 0 : left) + 1; } }
+    const A = g.a, B = g.b, adj = g.adj, off = g.off;
+    while (h.n) {
+      const u = h.pop(), d = h.top;
+      if (done[u] || d > dist[u]) continue;
+      done[u] = 1;
+      if (want && want[u] && --left === 0) break;
+      for (let k = off[u], e1 = off[u + 1]; k < e1; k++) {
+        const e = adj[k], v = A[e] === u ? B[e] : A[e], nd = d + cost[e];
         if (nd < dist[v]) { dist[v] = nd; pe[v] = e; h.push(nd, v); }
       }
     }
@@ -189,7 +208,8 @@
   // hubs: [{id, lat, lon, hex}] -> MST links
   function greenbelt(g, hubs, cost, lr, P) {
     const S = hubs.map((h) => seeds(g, h.lat, h.lon, h.hex, lr, P));
-    const runs = S.map((s) => dijkstra(g, s, cost));
+    const allTargets = S.flat().map(([n]) => n);
+    const runs = S.map((s) => dijkstra(g, s, cost, allTargets));
     const pairs = [];
     for (let i = 0; i < hubs.length; i++) for (let j = i + 1; j < hubs.length; j++) {
       let best = Infinity, end = -1;
@@ -213,7 +233,7 @@
 
   function pointToPoint(g, a, b, cost, lr, P) {
     const Sa = seeds(g, a.lat, a.lon, a.hex, lr, P), Sb = seeds(g, b.lat, b.lon, b.hex, lr, P);
-    const r = dijkstra(g, Sa, cost);
+    const r = dijkstra(g, Sa, cost, Sb.map(([n]) => n));
     let best = Infinity, end = -1;
     for (const [s, c] of Sb) { const v = r.dist[s] + c; if (v < best) { best = v; end = s; } }
     if (!isFinite(best)) return null;

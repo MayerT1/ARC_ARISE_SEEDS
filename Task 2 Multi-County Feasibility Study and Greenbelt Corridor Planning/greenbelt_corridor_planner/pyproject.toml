@@ -1,6 +1,6 @@
 [project]
 name = "seeds-cds"
-version = "0.2.1"
+version = "0.2.2"
 description = "SEEDS greenbelt corridor decision support (ARC ARISE, UAH Tasks 2+3)"
 requires-python = ">=3.10"
 dependencies = ["earthengine-api>=1.0", "geopandas>=0.14", "shapely>=2.0", "h3>=4.0", "numpy", "pandas", "pyyaml"]

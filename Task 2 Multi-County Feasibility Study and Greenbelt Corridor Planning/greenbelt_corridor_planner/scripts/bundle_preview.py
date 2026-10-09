@@ -18,7 +18,7 @@ def main(out="seeds_planner_bundle.html", preview=False):
         if preview else html
     html = html.replace('<link rel="stylesheet" href="../assets/vendor/leaflet.css">',
                         f"<style>{read('assets/vendor/leaflet.css')}</style>")
-    html = html.replace('<link rel="stylesheet" href="../assets/app.css">', f"<style>{read('assets/app.css')}</style>")
+    html = re.sub(r'<link rel="stylesheet" href="\.\./assets/app\.css(\?v=[\d.]+)?">', lambda m: f"<style>{read('assets/app.css')}</style>", html)
     data = {"cells": json.loads(read("data/cells.json")), "config": json.loads(read("data/config.json"))}
     for k in ("network", "padus", "parcels"):
         f = DOCS / "data" / f"{k}.json"
@@ -26,9 +26,9 @@ def main(out="seeds_planner_bundle.html", preview=False):
     boot = f"<script>window.SEEDS_DATA={json.dumps(data, separators=(',', ':'))};" \
            f"window.SEEDS_PREVIEW={str(preview).lower()};</script>"
     for src in ["vendor/leaflet.js", "vendor/h3-js.umd.js", "engine.js", "app.js"]:
-        tag = f'<script src="../assets/{src}"></script>'
         js = read(f"assets/{src}").replace("</script", "<\\/script")
-        html = html.replace(tag, (boot if src == "vendor/leaflet.js" else "") + f"<script>{js}</script>")
+        pat = r'<script src="\.\./assets/' + re.escape(src) + r'(\?v=[\d.]+)?"></script>'
+        html = re.sub(pat, lambda m, js=js, src=src: (boot if src == "vendor/leaflet.js" else "") + f"<script>{js}</script>", html)
     html = html.replace('href="../"', 'href="https://github.com/MayerT1/ARC_ARISE_SEEDS"')
     Path(out).write_text(html, encoding="utf-8")
     print(f"{out}: {Path(out).stat().st_size / 1e6:.2f} MB")

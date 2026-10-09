@@ -22,7 +22,15 @@ from .config import DEFAULT_CONFIG, DEFAULT_HUBS, ROOT, load_config
 
 def serve(port: int, open_browser: bool = True) -> None:
     docs = ROOT / "docs"
-    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(docs))
+    class NoCache(http.server.SimpleHTTPRequestHandler):
+        def end_headers(self):  # always serve the latest build (no stale CSS/JS/data)
+            self.send_header("Cache-Control", "no-store, must-revalidate")
+            super().end_headers()
+
+        def log_message(self, *a):
+            pass
+
+    handler = functools.partial(NoCache, directory=str(docs))
     httpd = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
     url = f"http://localhost:{port}/tool/"
     print(f"Serving {docs}\nPlanner: {url}\nCtrl+C to stop")

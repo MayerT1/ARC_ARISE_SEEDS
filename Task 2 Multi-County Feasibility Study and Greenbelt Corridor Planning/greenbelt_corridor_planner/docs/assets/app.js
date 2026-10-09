@@ -19,7 +19,7 @@
   let DATA = window.SEEDS_DATA;
   if (!DATA) {
     const base = new URL("../data/", document.currentScript?.src || location.href);
-    const get = (f, optional) => fetch(new URL(f, base)).then((r) => (r.ok ? r.json() : optional ? null : Promise.reject(f)))
+    const get = (f, optional) => fetch(new URL(f, base), { cache: "no-cache" }).then((r) => (r.ok ? r.json() : optional ? null : Promise.reject(f)))
       .catch((e) => (optional ? null : Promise.reject(e)));
     const [cells, config, network, padus, parcels] = await Promise.all([
       get("cells.json"), get("config.json"), get("network.json", true), get("padus.json", true), get("parcels.json", true)]);
@@ -433,7 +433,7 @@
   // ---------------------------------------------------------------- compute
   let t1 = 0, t2 = 0;
   const schedule = () => { cancelAnimationFrame(t1); t1 = requestAnimationFrame(compute); };
-  const scheduleCorr = () => { clearTimeout(t2); t2 = setTimeout(runCorridors, 120); };
+  const scheduleCorr = () => { clearTimeout(t2); t2 = setTimeout(runCorridors, 350); };
   function compute() {
     priority = E.composite(C.norm, S.weights, N);
     const s = Float64Array.from(priority).sort();

@@ -44,3 +44,10 @@ def test_classes_costs_commands_documented():
 def test_scenarios_documented():
     for s in CFG["scenarios"]:
         assert f"`{s}`" in FS, s
+
+
+def test_web_assets_versioned():
+    """Asset URLs carry ?v=<version> so browsers load each release without a hard refresh."""
+    html = (ROOT / "docs" / "tool" / "index.html").read_text()
+    for a in ("app.css", "engine.js", "app.js"):
+        assert f"{a}?v={seeds_cds.__version__}" in html, a
