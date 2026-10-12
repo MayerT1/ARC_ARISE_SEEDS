@@ -188,3 +188,12 @@ def test_js_engine_matches_python(demo, tmp_path):
         assert abs(L["cost"] - js_links[k]["c"]) < 1e-6 * max(1, L["cost"])
         b = g.breakdown(L["edges"])
         assert all(abs(b[t] - js_links[k]["b"][t]) < 1e-6 for t in b)
+
+
+def test_padus_polygons_only():
+    from seeds_cds.gee_layers import _polygons_only
+    sq = {"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]}
+    gc = {"type": "GeometryCollection", "geometries": [sq, {"type": "LineString", "coordinates": [[0, 0], [1, 1]]}]}
+    assert _polygons_only(gc)["type"] == "MultiPolygon" and len(_polygons_only(gc)["coordinates"]) == 1
+    assert _polygons_only({"type": "LineString", "coordinates": [[0, 0], [1, 1]]}) is None
+    assert _polygons_only(None) is None

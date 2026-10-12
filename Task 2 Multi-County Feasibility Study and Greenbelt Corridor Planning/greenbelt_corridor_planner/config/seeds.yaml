@@ -4,7 +4,7 @@
 project:
   name: SEEDS Greenbelt Corridor Decision Support
   short: SEEDS-CDS
-  version: 0.2.2
+  version: 0.2.4
 
 # ---------------------------------------------------------------- AOI
 counties:

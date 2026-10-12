@@ -1,7 +1,7 @@
 # Greenbelt Corridor Planner: Fact Sheet
 
 **SEEDS (Southern Environmental & Economic Development Strategy) · ARC ARISE · UAH SOW Tasks 2 + 3**
-**Version 0.2.2** · maintained alongside the code: every technical change updates this file (see [Keeping this document current](#20-keeping-this-document-current)).
+**Version 0.2.4** · maintained alongside the code: every technical change updates this file (see [Keeping this document current](#20-keeping-this-document-current)).
 
 ---
 
@@ -385,6 +385,8 @@ The planner is a static website: HTML, JavaScript and JSON files, with no server
 
 | Version | Date | Changes |
 |---|---|---|
+| 0.2.4 | 2026-10-12 | Fixed map collapsing to the side panel's content height when the demo banner is hidden (real data); fixed startup crash on PAD-US GeometryCollection / empty geometries (no hexes, empty county table); PAD-US export keeps polygon parts only; county table fits the panel |
+| 0.2.3 | 2026-10-12 | Side panel: tab labels and table headers no longer break mid-word (Land / Counties tabs); numbers stay on one line |
 | 0.2.2 | 2026-10-09 | Browser routing 4–5× faster on the full network (typed-array heap, early exit once all hubs are reached, bounded hub snapping): ~0.85 s for 15 hubs over ~92k nodes; local server sends no-cache headers and asset URLs carry the version so updates load without a hard refresh; page body never scrolls (panel scrolls on its own) |
 | 0.2.1 | 2026-10-08 | Fixed Overpass query (OSM download failed in 0.2.0); failing OSM tiles split in 4 and retried, finished tiles cached, run stops without writing if OSM returns nothing; `sources` runs a small test query; ArcGIS layer auto-selection skips label/annotation layers and picks the layer with most features in the AOI; 403 retried with a browser User-Agent; Earth Engine project read from config or `EE_PROJECT`; map keeps a fixed size while the side panel scrolls (single-column layout below 700 px) |
 | 0.2.0 | 2026-10-08 | Trail-following corridors over the real trail, sidewalk and street network (OSM + official layers) with gap connectors; corridor composition and gaps-to-close list; new criteria `trail_density`, `trail_proximity`, `walkable_proximity`; PAD-US ownership layer and route crossing table; parcel source registry with live and batch corridor parcel lookup and owner screening; map feedback with Google Sheets backend; `network`, `sources`, `parcels` commands; Earth Engine results cached; service-account auth for scheduled tile refresh; hosting workflows; this fact sheet |

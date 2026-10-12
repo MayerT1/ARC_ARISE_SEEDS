@@ -25,7 +25,18 @@
       get("cells.json"), get("config.json"), get("network.json", true), get("padus.json", true), get("parcels.json", true)]);
     DATA = { cells, config, network, padus, parcels };
   }
-  const C = DATA.cells, CFG = DATA.config, NET = DATA.network, PADUS = DATA.padus?.features || [];
+  // keep polygon parts only (Earth Engine clips can return GeometryCollections or empty geometries)
+  const polyOnly = (g) => {
+    if (!g) return null;
+    if (g.type === "Polygon" || g.type === "MultiPolygon") return g;
+    if (g.type === "GeometryCollection") {
+      const polys = (g.geometries || []).flatMap((x) => { const p = polyOnly(x); return !p ? [] : p.type === "Polygon" ? [p.coordinates] : p.coordinates; });
+      return polys.length ? { type: "MultiPolygon", coordinates: polys } : null;
+    }
+    return null;
+  };
+  const C = DATA.cells, CFG = DATA.config, NET = DATA.network;
+  const PADUS = (DATA.padus?.features || []).map((f) => ({ ...f, geometry: polyOnly(f.geometry) })).filter((f) => f.geometry);
   const WEB = CFG.web || {};
   const N = C.h3.length;
   const idxOf = new Map(C.h3.map((h, i) => [h, i]));
@@ -590,9 +601,10 @@
 
   // ---------------------------------------------------------------- land: PAD-US + parcels
   const bboxOf = (geom) => {
+    if (!geom || !geom.coordinates) return [180, 90, -180, -90];
     let a = 180, b = 90, c = -180, d = -90;
     const walk = (x) => (typeof x[0] === "number" ? (x[0] < a && (a = x[0]), x[1] < b && (b = x[1]), x[0] > c && (c = x[0]), x[1] > d && (d = x[1])) : x.forEach(walk));
-    walk(geom.coordinates);
+    try { walk(geom.coordinates); } catch { /* malformed geometry */ }
     return [a, b, c, d];
   };
   PADUS.forEach((f) => (f.bbox ||= bboxOf(f.geometry)));
@@ -713,6 +725,7 @@
           acres: f.properties.acres, landuse: f.properties.landuse, value: f.properties.value, address: f.properties.address,
           cls: f.properties.owner_class, geometry: f.geometry, props: f.properties }));
       }
+      feats = feats.map((f) => ({ ...f, geometry: polyOnly(f.geometry) })).filter((f) => f.geometry);
       const uniq = new Map(feats.map((f) => [`${f.src}|${f.id}|${f.owner}|${JSON.stringify(f.geometry).length}`, f]));
       const ov = overlay([...uniq.values()], lastSamples);
       parcelRows = [...ov.entries()].map(([f, r]) => ({ ...f, km_trail: r.trail, km_walk: r.walk, km_new: r.new,
@@ -768,7 +781,7 @@
     for (let i = 0; i < N; i++) { const a = agg[C.county[i]]; a.n++; a.sum += priority[i]; if (priority[i] >= q80) a.top++; }
     const rows = C.counties.map((c, j) => ({ c, ...agg[j], mean: agg[j].sum / agg[j].n, tk: trailKmByCounty[j] })).sort((a, b) => b.mean - a.mean);
     $("#county-tbl").innerHTML = `<thead><tr><th>County</th><th>ARC</th><th class="n">Mean</th><th class="n">Top 20%</th><th class="n">Trail km</th></tr></thead><tbody>${rows
-      .map((r) => `<tr><td>${esc(r.c.name)}, ${r.c.state}</td><td><span class="pill ${esc(r.c.arc_status)}">${esc(r.c.arc_status)}</span></td><td class="n">${fmt(r.mean, 2)}</td><td class="n">${fmt((100 * r.top) / r.n, 0)}%</td><td class="n">${fmt(r.tk, 0)}</td></tr>`).join("")}</tbody>`;
+      .map((r) => `<tr><td>${esc(r.c.name)} <span class="k">${r.c.state}</span></td><td><span class="pill ${esc(r.c.arc_status)}">${esc(r.c.arc_status)}</span></td><td class="n">${fmt(r.mean, 2)}</td><td class="n">${fmt((100 * r.top) / r.n, 0)}%</td><td class="n">${fmt(r.tk, 0)}</td></tr>`).join("")}</tbody>`;
   }
 
   // ---------------------------------------------------------------- tooltips + legend + data tab

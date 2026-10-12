@@ -281,6 +281,28 @@ def padus_features(aoi: ee.Geometry, A: dict, page: int = 2000) -> list[dict]:
             got = ee.FeatureCollection(lst.slice(off, off + page)).getInfo()["features"]
             feats += [f for f in got if f.get("geometry")]
         print(f"  PAD-US {cat}: {n} units")
+    out = []
     for f in feats:
         f.pop("id", None)
-    return feats
+        g = _polygons_only(f.get("geometry"))
+        if g:
+            f["geometry"] = g
+            out.append(f)
+    return out
+
+
+def _polygons_only(g):
+    """Keep polygon parts of a geometry (EE intersections can return GeometryCollections)."""
+    if not g:
+        return None
+    t = g.get("type")
+    if t in ("Polygon", "MultiPolygon"):
+        return g
+    if t == "GeometryCollection":
+        polys = []
+        for x in g.get("geometries", []):
+            p = _polygons_only(x)
+            if p:
+                polys += [p["coordinates"]] if p["type"] == "Polygon" else p["coordinates"]
+        return {"type": "MultiPolygon", "coordinates": polys} if polys else None
+    return None
