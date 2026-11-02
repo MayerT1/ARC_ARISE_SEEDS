@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SEEDS Partner Kickoff</title>
+<meta name="description" content="Agenda, exercises, materials and RSVP for the SEEDS partner kickoff (ACI, LTNAL, UAH, Sewanee), week of January 4, 2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="kickoff.css?v=2">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./"><b>SEEDS</b><span>Partner kickoff</span></a>
+  <nav aria-label="Sections">
+    <a href="#agenda">Agenda</a><a href="#roles">Roles</a><a href="#exercises">Exercises</a>
+    <a href="#materials">Materials</a><a href="#rsvp" class="cta">RSVP</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker" id="ev-subtitle"></p>
+    <h1 id="ev-title">SEEDS Partner Kickoff</h1>
+    <dl class="facts">
+      <div><dt>When</dt><dd id="ev-when"></dd><dd class="flag" id="ev-status"></dd></div>
+      <div><dt>Time</dt><dd id="ev-time"></dd></div>
+      <div><dt>Where</dt><dd id="ev-where"></dd><dd id="ev-join"></dd></div>
+    </dl>
+    <p class="hosts" id="ev-hosts"></p>
+  </section>
+
+  <section id="outcomes" class="band">
+    <h2>What we leave with</h2>
+    <ol class="outcomes" id="outcomes-list"></ol>
+  </section>
+
+  <section id="agenda">
+    <div class="sec-head">
+      <h2>Agenda</h2>
+      <p class="note" id="agenda-note">Times are proposed until the date is set. Tags show which outcome each session builds.</p>
+    </div>
+    <div class="scroll"><table class="agenda" id="agenda-tbl"></table></div>
+  </section>
+
+  <section id="roles" class="band">
+    <h2>Who does what</h2>
+    <div class="roles" id="roles-grid"></div>
+  </section>
+
+  <section id="exercises">
+    <div class="sec-head">
+      <h2>Exercises</h2>
+      <p class="note">Each exercise has an in-room and a digital version. Facilitators: open one to see steps, materials and the expected output.</p>
+    </div>
+    <div id="ex-list"></div>
+  </section>
+
+  <section id="materials" class="band">
+    <div class="sec-head">
+      <h2>Materials</h2>
+      <p class="note" id="mat-note"></p>
+    </div>
+    <div id="mat-sections"></div>
+  </section>
+
+  <section id="prework">
+    <h2>Before you arrive</h2>
+    <ul class="checks" id="prework-list"></ul>
+  </section>
+
+  <section id="rsvp" class="band">
+    <div class="sec-head">
+      <h2>RSVP</h2>
+      <p class="note">We use your GitHub username to give you access to the project repository and tools.</p>
+    </div>
+    <form id="rsvp-form" class="form" novalidate>
+      <div class="f"><label for="r-name">Name</label><input id="r-name" name="name" required autocomplete="name"></div>
+      <div class="f"><label for="r-org">Organization</label><select id="r-org" name="org" required></select></div>
+      <div class="f"><label for="r-email">Email</label><input id="r-email" name="email" type="email" required autocomplete="email"></div>
+      <div class="f"><label for="r-gh">GitHub username</label><input id="r-gh" name="github" placeholder="e.g. MayerT1" autocomplete="off" spellcheck="false">
+        <small>No account yet? Create one free at github.com, then add it here.</small></div>
+      <div class="f"><label for="r-mode">Attending</label><select id="r-mode" name="mode">
+        <option>In person</option><option>Remote</option><option>Not able to attend</option></select></div>
+      <div class="f"><label for="r-role">Your role in SEEDS</label><input id="r-role" name="role" placeholder="e.g. facilitator, GIS, student lead"></div>
+      <div class="f wide"><label for="r-note">Anything we should know (access, dietary, topics you want covered)</label><textarea id="r-note" name="note" rows="3"></textarea></div>
+      <div class="f wide row"><button class="btn primary" type="submit">Send RSVP</button><span id="rsvp-msg" class="msg" role="status"></span></div>
+      <div class="f wide" id="rsvp-fallback" hidden></div>
+    </form>
+  </section>
+
+  <section id="links">
+    <h2>Links</h2>
+    <ul class="links" id="links-list"></ul>
+  </section>
+</main>
+
+<footer class="foot"><span id="foot-updated"></span> · <a href="https://github.com/MayerT1/ARC_ARISE_SEEDS/tree/main/Site/kickoff_site">Edit this site</a></footer>
+
+<dialog id="viewer" aria-label="File preview">
+  <div class="vbar"><b id="viewer-title"></b><a id="viewer-open" target="_blank" rel="noopener">Open in new tab</a><button class="btn" id="viewer-close" type="button">Close</button></div>
+  <iframe id="viewer-frame" title="File preview" allow="autoplay; fullscreen"></iframe>
+</dialog>
+
+<script src="kickoff.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+partner,milestone,quarter_start,quarter_end,depends_on,source,notes
+UAH,Task 1 stakeholder instruments final,2026-Q4,2027-Q1,,SOW Task 1 (Oct-Dec 2026),Instruments used in facilitator training
+UAH,Task 4 economic assessment framework final,2026-Q4,2027-Q1,,SOW Task 4 (Oct-Dec 2026),Indicators collected at county workshops
+ACI,Hire community facilitators,2027-Q1,2027-Q1,,Plan document,ACI supervises; LTNAL supports
+ACI + LTNAL,Facilitator training (methods STEAM data protocols),2027-Q1,2027-Q1,Task 1 instruments; Hire facilitators,Plan document,UAH trains data-collection methods
+ACI + LTNAL,Large focus group - Alabama,2027-Q1,2027-Q2,Facilitator training,Plan document,
+ACI + LTNAL,Large focus group - Tennessee,2027-Q1,2027-Q2,Facilitator training,Plan document,
+ACI + LTNAL,County workshops and listening sessions - Wave 1,2027-Q2,2027-Q2,Focus groups,Plan document,Proposed: Grundy Marion Franklin Sequatchie
+ACI + LTNAL,County workshops and listening sessions - Wave 2,2027-Q3,2027-Q3,Wave 1 lessons,Plan document,Proposed: Warren Van Buren Bledsoe DeKalb Coffee
+ACI + LTNAL,County workshops and listening sessions - Wave 3,2027-Q3,2027-Q4,Wave 2,Plan document,Proposed: Madison Marshall Jackson
+Sewanee,Student field-data days at workshops,2027-Q2,2027-Q4,Field protocol,Plan document,
+UAH,Greenbelt Corridor Planner updates with workshop weights,2027-Q2,2027-Q4,County workshops,SOW Task 2/3,
+UAH,Feasibility study and corridor plan draft,2027-Q3,2027-Q3,County workshops; Planner,SOW Task 2 (ends Sep 2027),
+UAH,Economic impact projection tool,2027-Q1,2028-Q1,Task 4 framework; workshop data,SOW Task 5 (Mar 2027-Mar 2028),
+UAH,Geo-AI decision support prototype,2026-Q4,2028-Q1,,SOW Task 3 (Oct 2026-Mar 2028),
+ACI,Results back to each county,2027-Q4,2028-Q1,Draft corridor plan,Proposed,Re-engagement visit
+ACI,Synthesis and rollout of final deliverables,2028-Q1,2028-Q2,All,Plan document (Feb-Apr 2028),
+All,Implementation roadmap and funding applications prepared,2028-Q1,2028-Q2,Synthesis,Plan document,

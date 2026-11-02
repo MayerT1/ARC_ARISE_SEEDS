@@ -1,0 +1,150 @@
+{
+  "event": {
+    "title": "SEEDS Partner Kickoff",
+    "subtitle": "Southern Environmental & Economic Development Strategy · Southern Appalachian Greenbelt Corridor",
+    "when": "Week of January 4, 2027 · half day",
+    "when_status": "Date and time to be confirmed",
+    "default_times": "9:00 am – 1:00 pm Central (proposed)",
+    "where": "Hybrid · venue to be confirmed",
+    "join_link": null,
+    "hosts": "Appalachian Conservation Institute (lead) with the Land Trust of North Alabama, the University of Alabama in Huntsville and the University of the South, Sewanee",
+    "updated": "2026-11-02"
+  },
+
+  "outcomes": [
+    {"id": "O1", "title": "Project roadmap", "text": "A sequenced engagement plan and timetable for all 12 counties and every partner task, January 2027 to April 2028."},
+    {"id": "O2", "title": "Re-engagement & reporting process", "text": "Who reports what to whom and when, the partner meeting rhythm, shared workspaces, and when we return to each county."},
+    {"id": "O3", "title": "Trained engagement personnel", "text": "ACI and LTNAL staff and facilitators practiced in the stakeholder instruments, participatory-science protocol and the planning metrics ARC tracks."},
+    {"id": "O4", "title": "Media", "text": "A shared message, a media calendar with owners, and photo and story consent practice."},
+    {"id": "O5", "title": "Implementation vision", "text": "A first statement of what happens after the 18-month planning period: priority project types and the funding streams to pursue."}
+  ],
+
+  "partners": [
+    {"short": "ACI", "org": "Appalachian Conservation Institute", "role": "Project lead and fiscal agent",
+     "tasks": ["Leads and coordinates the partnership; manages the ARC award and reporting", "Hires and supervises community facilitators", "Leads county workshops and listening sessions", "Contributes to STEAM engagement", "Leads synthesis and rollout of final deliverables (Feb–Apr 2028)"]},
+    {"short": "LTNAL", "org": "Land Trust of North Alabama", "role": "Co-lead for engagement and field planning",
+     "tasks": ["Co-leads community engagement with ACI", "Helps design workshops and supports the facilitation team", "Provides conservation-land data and landowner-engagement expertise", "Contributes staff time as match"]},
+    {"short": "UAH", "org": "University of Alabama in Huntsville", "role": "Technical and economic analysis lead",
+     "tasks": ["Task 1: stakeholder consultation and survey design (Oct–Dec 2026)", "Task 2: feasibility study and greenbelt corridor planning (Oct 2026–Sep 2027)", "Task 3: Geo-AI decision support prototype (Oct 2026–Mar 2028)", "Task 4: economic impact assessment design (Oct–Dec 2026)", "Task 5: economic impact projection tool (Mar 2027–Mar 2028)", "Trains facilitators in data-collection methods"]},
+    {"short": "Sewanee", "org": "University of the South, Sewanee", "role": "STEAM and workforce development lead",
+     "tasks": ["Leads the STEAM engagement strategy", "Integrates students into field data collection and geospatial analysis", "Supports participatory-science activities at workshops", "Builds workforce pathways in natural resources and outdoor recreation"]},
+    {"short": "SCTP", "org": "South Cumberland Tourism Partnership", "role": "Tourism advisory partner",
+     "tasks": ["Tourism-sector guidance", "Reviews engagement plans", "Sounding board for workshop design and delivery"]}
+  ],
+
+  "agenda": [
+    {"start": "9:00", "end": "9:20", "title": "Welcome, introductions and why SEEDS", "lead": "ACI", "format": "Plenary", "outcomes": ["O5"], "exercise": "E0",
+     "detail": "Welcome and round of introductions. Everyone pins a place in the corridor that matters to them (Exercise 0)."},
+    {"start": "9:20", "end": "9:45", "title": "The project plan: goals, deliverables and who does what", "lead": "ACI with each partner", "format": "Slides", "outcomes": ["O1"],
+     "detail": "Intro deck: the region, ARC goals and performance measures, the four deliverables, each partner's tasks (3 minutes per partner), the 18-month timeline."},
+    {"start": "9:45", "end": "10:25", "title": "Build the roadmap", "lead": "ACI and LTNAL facilitate", "format": "Hands-on", "outcomes": ["O1"], "exercise": "E1",
+     "detail": "Sequence every task and county engagement on one wall, January 2027 to April 2028, and mark the dependencies between partners."},
+    {"start": "10:25", "end": "10:35", "title": "Break", "lead": "", "format": "Break", "outcomes": []},
+    {"start": "10:35", "end": "10:50", "title": "Training I: stakeholder instruments and planning metrics", "lead": "UAH", "format": "Training", "outcomes": ["O3"],
+     "detail": "UAH walks through the Task 1 instruments, the pre- and post-engagement capacity assessment, sign-in and participation logs, and how answers feed the Greenbelt Corridor Planner."},
+    {"start": "10:50", "end": "11:15", "title": "Rehearse a county workshop", "lead": "UAH coaches; ACI and LTNAL facilitate", "format": "Hands-on", "outcomes": ["O3"], "exercise": "E2",
+     "detail": "In trios, ACI and LTNAL staff run a 15-minute mini-workshop end to end, including the weighting activity in the live planner."},
+    {"start": "11:15", "end": "11:25", "title": "Training II: STEAM engagement and participatory science", "lead": "Sewanee", "format": "Training", "outcomes": ["O3"],
+     "detail": "Sewanee introduces the STEAM engagement strategy, student roles and the field data-collection protocol."},
+    {"start": "11:25", "end": "11:40", "title": "Practice the field protocol", "lead": "Sewanee", "format": "Hands-on", "outcomes": ["O3"], "exercise": "E3",
+     "detail": "Each table records two recreation or community assets with the field form and checks the records arrive."},
+    {"start": "11:40", "end": "12:05", "title": "How we run the project: reporting and re-engagement", "lead": "ACI", "format": "Hands-on", "outcomes": ["O2"], "exercise": "E4",
+     "detail": "Agree the reporting matrix, meeting rhythm, shared workspaces and the cycle for returning to each county."},
+    {"start": "12:05", "end": "12:20", "title": "Our story and media plan", "lead": "ACI and LTNAL", "format": "Hands-on", "outcomes": ["O4"], "exercise": "E5",
+     "detail": "Draft one shared message and the media calendar for 2027."},
+    {"start": "12:20", "end": "12:50", "title": "Beyond 18 months: the implementation vision", "lead": "All partners; UAH facilitates", "format": "Hands-on", "outcomes": ["O5"], "exercise": "E6",
+     "detail": "Write the 2030 headline for the corridor, then work back to priority project types and the funding streams to pursue."},
+    {"start": "12:50", "end": "1:00", "title": "Commitments and close", "lead": "ACI", "format": "Plenary", "outcomes": ["O1", "O2"],
+     "detail": "Each partner names three actions for the next 30 days. Two-minute session evaluation (the same pre/post format we will use in counties)."}
+  ],
+  "agenda_csv_url": null,
+
+  "exercises": [
+    {"id": "E0", "title": "Pin your place", "minutes": 10, "outcomes": ["O5"], "lead": "ACI",
+     "purpose": "Ground the day in the landscape and show the planner's comment tool before we rely on it in counties.",
+     "materials": ["Projector with the Greenbelt Corridor Planner open", "Phones or laptops", "Printed 12-county map and dot stickers for anyone offline"],
+     "steps": ["Open the planner and press Give feedback.", "Click the place in the corridor that matters most to you and write one sentence about why.", "Watch the pins appear on the shared screen; the facilitator reads three aloud."],
+     "output": "A first set of place-based comments that also tests the feedback channel.",
+     "digital": "Planner → Give feedback (pins appear live once the feedback sheet is connected)."},
+
+    {"id": "E1", "title": "Roadmap wall", "minutes": 40, "outcomes": ["O1"], "lead": "ACI and LTNAL",
+     "purpose": "Turn the grant timeline into one sequenced plan everyone can see, with county engagement in waves and the hand-offs between partners made explicit.",
+     "materials": ["Wall or whiteboard with swimlanes per partner and columns for each quarter, Q1 2027 to Q2 2028", "Pre-printed milestone cards (template: roadmap_cards.csv)", "Blank cards, three colors of dots, string or tape for dependencies"],
+     "steps": ["Place the pre-printed milestones in their partner lane and quarter (10 min).", "Draw a line from every milestone to what it depends on; anything without an owner gets one (10 min).", "Group the 12 counties into engagement waves and place each wave's focus group, workshops and report-back (10 min). Starting proposal: Wave 1 South Cumberland (Grundy, Marion, Franklin, Sequatchie), Wave 2 northern plateau (Warren, Van Buren, Bledsoe, DeKalb, Coffee), Wave 3 Alabama (Madison, Marshall, Jackson).", "Dot-vote the three biggest schedule risks and assign an owner to each (10 min)."],
+     "output": "Photographed wall, digitized into the shared roadmap sheet within a week; risk list with owners.",
+     "digital": "Import roadmap_cards.csv into Google Sheets and work it as a timeline, or use any shared whiteboard with the same swimlanes."},
+
+    {"id": "E2", "title": "Workshop rehearsal", "minutes": 25, "outcomes": ["O3"], "lead": "UAH coaches",
+     "purpose": "Have every ACI and LTNAL facilitator run the county workshop sequence once before doing it for real, so the planning metrics are captured the same way in all 12 counties.",
+     "materials": ["Role cards: county commissioner, outfitter or business owner, landowner, student", "Printed or digital Task 1 instrument and pre/post capacity assessment", "Laptop with the planner (Priority tab)", "Observer checklist (template: workshop_checklist.csv)"],
+     "steps": ["Form trios: facilitator (ACI or LTNAL), participant with a role card, observer.", "Facilitator opens: purpose, consent, sign-in with county (2 min).", "Pre-assessment: three readiness questions (2 min).", "Priorities survey: the core Task 1 questions (4 min).", "Weighting: the participant sets the planner's priority sliders to match their answers; facilitator presses Save weights (4 min).", "Place-based comment: one pin with Give feedback (2 min).", "Post-assessment and close (1 min). Rotate roles if time allows.", "Observer marks the checklist; UAH collects the saved weights files."],
+     "output": "Each facilitator has run the full sequence once; saved weights files test the survey-to-planner link; checklist gaps become fixes to the instrument.",
+     "metrics": ["Participants served: sign-in records (target 100 over the project)", "Participants improved: pre/post change (target 50)", "Communities served: county recorded at sign-in (target 12)", "Communities improved: capacity assessment change (target 12)"],
+     "digital": "Planner Priority tab → Save weights / Import stakeholder weights."},
+
+    {"id": "E3", "title": "Field protocol practice", "minutes": 15, "outcomes": ["O3"], "lead": "Sewanee",
+     "purpose": "Make sure students, facilitators and residents can record assets the same way, so participatory-science data can flow into the corridor analysis.",
+     "materials": ["Phones with the field form (Sewanee to provide the form link)", "Asset types list: trailhead, overlook, river access, campground, outfitter, lodging, food, gap or hazard"],
+     "steps": ["Sewanee demonstrates one record: asset type, photo, location, condition, notes (3 min).", "Each table records two assets near the venue (7 min).", "Look at the records together; agree what to fix in the form and who reviews student data (5 min)."],
+     "output": "Tested field form, agreed protocol and review roles; first sample records.",
+     "digital": "Records exported as CSV/GeoJSON drop into the planner's data_sources folder."},
+
+    {"id": "E4", "title": "Operating rhythm and reporting matrix", "minutes": 25, "outcomes": ["O2"], "lead": "ACI",
+     "purpose": "Agree how the partnership runs for 18 months: reporting duties, meeting rhythm, where work lives, and when we go back to each county.",
+     "materials": ["Reporting matrix template (reporting_raci.csv)", "Year calendar", "List of shared spaces: GitHub repository, Drive folder, this site"],
+     "steps": ["Fill the matrix for each recurring report and deliverable: who is Responsible, Accountable, Consulted, Informed (10 min).", "Set the rhythm: core team, all-partner meeting, ARC reporting dates, subaward invoicing (5 min).", "Agree the county re-engagement cycle: introduction, workshop, results back to the county, final rollout (5 min).", "Confirm shared spaces and collect GitHub usernames for repository access (5 min)."],
+     "output": "Signed-off reporting matrix and meeting calendar; GitHub access list.",
+     "digital": "reporting_raci.csv in Google Sheets; usernames through the RSVP form on this page."},
+
+    {"id": "E5", "title": "Message house and media calendar", "minutes": 15, "outcomes": ["O4"], "lead": "ACI and LTNAL",
+     "purpose": "Speak about SEEDS with one voice and plan the moments worth sharing.",
+     "materials": ["Message house sheet: roof, three pillars, proof points", "Media calendar template (media_calendar.csv)", "Photo and story consent form"],
+     "steps": ["Write the one-sentence roof together (4 min).", "Fill the three pillars: conservation, the outdoor-recreation economy, workforce and students. Add two proof points each (5 min).", "Place media moments on the calendar with an owner: kickoff announcement, first county workshop, student field days, planner launch, final rollout (6 min)."],
+     "output": "Draft message house and a 2027 media calendar with owners; agreed consent practice.",
+     "digital": "media_calendar.csv in Google Sheets; drafts in the Media folder."},
+
+    {"id": "E6", "title": "Postcard from 2030", "minutes": 30, "outcomes": ["O5"], "lead": "UAH facilitates",
+     "purpose": "Start the implementation plan now, so the 18 months of planning point at fundable projects.",
+     "materials": ["Postcards or large sticky notes", "Funding streams list: ARC Area Development, USDA Rural Development, U.S. Forest Service, NOAA, NASA, Alabama and Tennessee tourism and conservation programs, foundations", "Dots for voting"],
+     "steps": ["Each person writes a 2030 newspaper headline about the corridor (5 min).", "Cluster the headlines into themes, such as connected trails, protected forest blocks, thriving gateway towns, local conservation jobs (8 min).", "For each theme, name the project types that would make it true and the funding streams that fit (10 min).", "Dot-vote the top three project types to carry into the 2028 implementation roadmap (7 min)."],
+     "output": "Draft implementation vision, three priority project types, and a first funding map.",
+     "digital": "Shared slide or whiteboard with the postcards; photo into the Notes folder."}
+  ],
+
+  "prework": [
+    "Send the RSVP below, including your GitHub username (create a free account at github.com if you do not have one).",
+    "Skim the one-page project summary and the planner fact sheet (links below).",
+    "Bring the names of two or three county contacts you expect to engage in 2027.",
+    "Bring a phone or laptop for the hands-on exercises."
+  ],
+
+  "materials": {
+    "drive_api_key": "",
+    "drive_root_folder_id": "",
+    "auto_sections_from_drive": true,
+    "sections": [
+      {"title": "Slides", "drive_folder": "", "repo_path": "", "links": []},
+      {"title": "Exercise templates", "links": [
+        {"name": "Roadmap milestone cards (CSV)", "url": "templates/roadmap_cards.csv"},
+        {"name": "Workshop observer checklist (CSV)", "url": "templates/workshop_checklist.csv"},
+        {"name": "Reporting matrix (CSV)", "url": "templates/reporting_raci.csv"},
+        {"name": "Media calendar (CSV)", "url": "templates/media_calendar.csv"},
+        {"name": "Agenda (CSV, to edit as a Google Sheet)", "url": "templates/agenda.csv"}
+      ]}
+    ]
+  },
+
+  "rsvp": {
+    "endpoint": null,
+    "orgs": ["ACI", "LTNAL", "UAH", "Sewanee", "South Cumberland Tourism Partnership", "Other"]
+  },
+
+  "links": [
+    {"label": "Greenbelt Corridor Planner (live tool)", "url": "../tool/"},
+    {"label": "Planner fact sheet", "url": "https://github.com/MayerT1/ARC_ARISE_SEEDS/blob/main/Task%202%20Multi-County%20Feasibility%20Study%20and%20Greenbelt%20Corridor%20Planning/greenbelt_corridor_planner/FACT_SHEET.md"},
+    {"label": "Project repository", "url": "https://github.com/MayerT1/ARC_ARISE_SEEDS"},
+    {"label": "NASA Earth Science Solution Co-Development Toolkit", "url": "https://science.data.nasa.gov/earth-science-solution-co-development-toolkit/"},
+    {"label": "Earth Action Solution Co-Development Toolkit (Zenodo, DOI 10.5281/zenodo.19866469)", "url": "https://doi.org/10.5281/zenodo.19866469"},
+    {"label": "ARC ARISE program", "url": "https://www.arc.gov/arise/"}
+  ]
+}

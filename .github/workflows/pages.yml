@@ -19,6 +19,7 @@ concurrency:
 
 env:
   PLANNER: "Task 2 Multi-County Feasibility Study and Greenbelt Corridor Planning/greenbelt_corridor_planner"
+  KICKOFF: "Site/kickoff_site"
 
 jobs:
   deploy:
@@ -31,9 +32,19 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
+          # project home + Greenbelt Corridor Planner  ->  /  and  /tool/
           cp -r "$PLANNER/docs/." _site/
-          if [ -f greenbelt_corridor_planner.png ]; then cp greenbelt_corridor_planner.png _site/assets/; fi
           cp "$PLANNER/FACT_SHEET.md" _site/FACT_SHEET.md
+          if [ -f greenbelt_corridor_planner.png ]; then cp greenbelt_corridor_planner.png _site/assets/; fi
+          # kickoff event site  ->  /kickoff/
+          rm -rf _site/kickoff
+          if [ -d "$KICKOFF" ]; then
+            mkdir -p _site/kickoff && cp -r "$KICKOFF/." _site/kickoff/
+          else
+            echo "::warning::$KICKOFF not found (folder names are case-sensitive on the build server)"
+          fi
+          find _site -maxdepth 2 -name "*.gs" -delete
+          echo "Published:"; find _site -maxdepth 2 -type d | sort
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

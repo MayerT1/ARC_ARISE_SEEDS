@@ -34,6 +34,10 @@
   .cols p { margin: 0; max-width: 62ch; }
   .ctys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; font-size: 14px; margin: 0; padding: 0; list-style: none; }
   .ctys li { display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+  .kick { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between;
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 18px 20px; }
+  .kick h2 { margin: 2px 0 6px; color: var(--ink); font-size: 24px; }
+  .kick p { margin: 0; max-width: 60ch; }
   footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
   @media (max-width: 620px) {
     .task { grid-template-columns: 1fr; }
@@ -49,6 +53,12 @@
     <p class="lede">Technical and analytical tools from the University of Alabama in Huntsville for the Southern Appalachian Greenbelt Corridor. The project covers twelve counties across Northeast Alabama and Southeast Tennessee.</p>
     <div class="meta"><span>Lead: Appalachian Conservation Institute</span><span>Subrecipient: UAH</span><span>Oct 2026 – Apr 2028</span></div>
   </header>
+
+  <section class="kick">
+    <div><p class="kicker">Week of January 4, 2027 · half day</p><h2>Partner kickoff</h2>
+    <p>ACI, LTNAL, UAH and Sewanee set the roadmap, train on the first task outputs and agree how we work together.</p></div>
+    <a class="cta" href="kickoff/">Agenda, materials &amp; RSVP</a>
+  </section>
 
   <section>
     <h2>UAH statement of work</h2>
