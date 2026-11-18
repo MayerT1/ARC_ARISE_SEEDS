@@ -7,9 +7,9 @@ Each survey block maps directly to a structural parameter in three econometric a
 Purpose: Quantify the capitalization of greenbelt proximity and EO land-cover composition into residential, agricultural, and commercial property values, and estimate municipal property tax revenue gains. (2.4)
 
 Econometric Specification:
-$$
-ln({P}_{it})\ =\ {\beta }_{0}+{\beta }_{1}{Dis{t}_{-}Corridor}_{i}+{\beta }_{2}{Dis{t}_{-}Corridor}_{i}^{2}+{X}_{i}^{'}\gamma +{L}_{b}^{'}\delta +{\theta }_{c}+{\tau }_{t}+{\varepsilon }_{it}
-$$
+
+$ln({P}_{it})\ =\ {\beta }_{0}+{\beta }_{1}{Dis{t}_{-}Corridor}_{i}+{\beta }_{2}{Dis{t}_{-}Corridor}_{i}^{2}+{X}_{i}^{'}\gamma +{L}_{b}^{'}\delta +{\theta }_{c}+{\tau }_{t}+{\varepsilon }_{it}$
+
 How will the Survey and EO data Fit in:
 
 * Dependent Variable ($ln({P}_{it})$) \- County parcel sales/assessed values (where available) supplemented by 4.3 stated percentage land-value expectations as Bayesian priors or bounds for ex-ante simulation in data-sparse rural counties (e.g., Van Buren, Bledsoe, Grundy).  
